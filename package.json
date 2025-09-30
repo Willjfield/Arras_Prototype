@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy-gh":"git branch -d gh-pages; git push -d origin gh-pages;"
   },
   "dependencies": {
     "@mapbox/mapbox-gl-sync-move": "^0.3.1",
