@@ -10,7 +10,7 @@
 
   import { onMounted, onUnmounted, ref, watch } from 'vue'
   import * as mapStyle from '../assets/style.json'
-  import { indicators } from '../assets/indicators.json'
+  //import { indicators } from '../assets/indicators.json'
   import Compare from '../assets/maplibre-gl-compare.js'
   import '../assets/maplibre-gl-compare.css'
 
@@ -29,10 +29,8 @@
     _type: string
   }>()
 
-
-  // const defaultLeftIndicator = 'uk_imd2019_SOA_decile'
   const leftStyle = JSON.parse(JSON.stringify(mapStyle))
-
+  leftStyle.layers.find(f=>f.id==='tracts-2022-fill').layout.visibility='none'
   // leftStyle.layers = leftStyle.layers.map(l => {
   //   if (choroplethIDs.has(l.id)) {
   //     l.paint['fill-color'] = indicators.find(i => i.field === defaultLeftIndicator)['fill-color']
@@ -40,7 +38,6 @@
   //   return l
   // })
 
-  // const defaultRightIndicator = 'ahah_v4_ah4ahah_pct'
   const rightStyle = JSON.parse(JSON.stringify(mapStyle))
   // rightStyle.layers = rightStyle.layers.map(l => {
   //   if (choroplethIDs.has(l.id)) {
