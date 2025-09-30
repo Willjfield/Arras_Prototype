@@ -9,8 +9,9 @@ const emitter = mitt();
 const app = createApp(App)
 app.provide('mitt', emitter)
 
+const historyString = process.env.NODE_ENV === 'production' ? '/Arras_Prototype/' : '';
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHistory(historyString),
     routes: [
         {
             path: '/',
