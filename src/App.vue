@@ -6,7 +6,9 @@
           <v-img width="100px" src="ArrasFoundation.png" />
         </template>
         <template v-slot:append>
-          <v-btn v-show="this.$route.name!=='landing'" to="/">Home</v-btn>
+          <RouterLink v-slot="{ href, navigate }" to="/">
+            <v-btn v-show="$route?.name!=='landing'" :href="href" @click="navigate">Home</v-btn>
+          </RouterLink>
         </template>
       </v-app-bar>
       <router-view></router-view>
@@ -14,6 +16,8 @@
   </main>
 </template>
 <script setup lang="ts">
+import { RouterLink, useRoute } from 'vue-router'
+const $route = useRoute()
 </script>
 <style scoped>
 .logo {

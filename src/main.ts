@@ -1,4 +1,4 @@
-import { createApp, nextTick } from 'vue'
+import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router';
 import vuetify from './plugins/vuetify.js'
 import App from './App.vue'

@@ -29,8 +29,11 @@
     _type: string
   }>()
 
-  const leftStyle = JSON.parse(JSON.stringify(mapStyle))
-  leftStyle.layers.find(f=>f.id==='tracts-2022-fill').layout.visibility='none'
+  const leftStyle: any = JSON.parse(JSON.stringify(mapStyle))
+  const layer2022 = leftStyle.layers.find((f: any) => f.id === 'tracts-2022-fill')
+  if (layer2022 && layer2022.layout) {
+    layer2022.layout.visibility = 'none'
+  }
   // leftStyle.layers = leftStyle.layers.map(l => {
   //   if (choroplethIDs.has(l.id)) {
   //     l.paint['fill-color'] = indicators.find(i => i.field === defaultLeftIndicator)['fill-color']
@@ -38,7 +41,7 @@
   //   return l
   // })
 
-  const rightStyle = JSON.parse(JSON.stringify(mapStyle))
+  const rightStyle: any = JSON.parse(JSON.stringify(mapStyle))
   // rightStyle.layers = rightStyle.layers.map(l => {
   //   if (choroplethIDs.has(l.id)) {
   //     l.paint['fill-color'] = indicators.find(i => i.field === defaultRightIndicator)['fill-color']
@@ -46,7 +49,7 @@
   //   return l
   // })
 
-  let _compare: Compare
+  let _compare: Compare | null = null
   // Watch for changes in props._type and execute function based on value
   watch(() => props._type, (newType, oldType) => {
     console.log(`Type changed from ${oldType} to ${newType}`)
@@ -66,7 +69,8 @@
         
       })
 
-      leftMap.on('mousemove', e => {
+      leftMap.on('mousemove', (e: any) => {
+        if (!leftMap) return
         const features = leftMap.queryRenderedFeatures(e.point, { })
         if (features.length === 0) return
         //console.log(features[0]?.properties)
@@ -81,14 +85,17 @@
         zoom: props._zoom,
       })
 
-      rightMap.on('mousemove', e => {
+      rightMap.on('mousemove', (e: any) => {
+        if (!rightMap) return
         const features = rightMap.queryRenderedFeatures(e.point, { })
         if (features.length === 0) return
         console.log(features[0]?.properties)
       })
     }
 
-    _compare = new Compare(leftMap, rightMap, comparisonContainer, { type: props._type })
+    if (leftMap && rightMap) {
+      _compare = new Compare(leftMap, rightMap, comparisonContainer, { type: props._type })
+    }
   })
 
   onUnmounted(() => {
