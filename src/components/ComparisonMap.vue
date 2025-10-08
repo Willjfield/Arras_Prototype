@@ -7,12 +7,13 @@
 
 <script lang="ts" setup>
   import maplibregl from 'maplibre-gl'
-
+  import { useCategoryStore } from '../stores/categoryStore'
   import { onMounted, onUnmounted, ref, watch } from 'vue'
   import * as mapStyle from '../assets/style.json'
-  //import { indicators } from '../assets/indicators.json'
   import Compare from '../assets/maplibre-gl-compare.js'
   import '../assets/maplibre-gl-compare.css'
+  const categoryStore = useCategoryStore()
+  const categoryData = ref<any>()
 
   const mapContainerLeft = ref<HTMLElement>()
   let leftMap: maplibregl.Map | null = null
@@ -31,6 +32,7 @@
 
   const leftStyle: any = JSON.parse(JSON.stringify(mapStyle))
   const layer2022 = leftStyle.layers.find((f: any) => f.id === 'tracts-2022-fill')
+
   if (layer2022 && layer2022.layout) {
     layer2022.layout.visibility = 'none'
   }
@@ -52,12 +54,17 @@
   let _compare: Compare | null = null
   // Watch for changes in props._type and execute function based on value
   watch(() => props._type, (newType, oldType) => {
-    console.log(`Type changed from ${oldType} to ${newType}`)
     if (_compare) _compare.switchType(newType)
+  })
+
+  watch(() => categoryStore.mainData, (newData, oldData) => {
+    categoryData.value = categoryStore.getDataFromCSVString()
+
   })
 
   onMounted(() => {
     console.log('mnt')
+    console.log(categoryData.value)
     // Ensure the container is properly initialized
     if (mapContainerLeft.value) {
       

@@ -1,0 +1,21 @@
+{   
+    "spreadsheetId":"1FdR-8pMy_3TdAyaDECaIzL0K7ASoBo49",
+    "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
+    "indicators": [
+        {
+            "title": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
+            "field": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
+            "geolevel":"tract"
+        },
+        {
+            "title": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
+            "field": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
+            "geolevel":"tract"
+        },
+        {
+            "title": "Graduation Rate",
+            "field": "Graduation Rate",
+            "geolevel":"school"
+        }
+    ]
+}

@@ -1,12 +1,12 @@
 <template>
     <v-main class="d-flex align-center justify-center" style="">
         <v-container>
-            <ComparisonMap :_center="[-80.537, 34.7963]" :_zoom="9.57" :_type="'sideBySide'" />
+            <ComparisonMap :_center="[-80.537, 34.7963]" :_zoom="9.57" :_type="'sideBySide'"  />
         </v-container>
     </v-main>
 </template>
 <style>
-.full-screen-main{
+.full-screen-main {
     display: block;
     left: 0;
     top: 0;
@@ -16,23 +16,36 @@
     position: absolute;
 }
 </style>
-<script>
+<script type="ts" setup>
 import ml from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import educationCsv from '../assets/education.csv?raw';
-import { nextTick } from 'vue';
+import { ref, onBeforeMount } from 'vue';
+import { useCategoryStore } from '../stores/categoryStore';
+const categoryStore = useCategoryStore();
 import ComparisonMap from '../components/ComparisonMap.vue';
+import axios from 'axios';
 
-export default {
-    name: 'Map',
-    components: {
-        ComparisonMap
-    },
-    data() {
-        return {}
-    },
-    watch: {},
-    mounted() { },
-    methods: {}
-}
+
+
+onBeforeMount(async () => {
+    try {
+        await categoryStore.loadCategories();
+        if (!categoryStore.selectedCategory) {
+            console.error('No category selected');
+            return;
+        }
+
+        const mainConfig = (await axios.get('/config/main.json')).data;
+        const categoryConfig = (await axios.get(categoryStore.selectedCategory.config)).data;
+        
+        // Use the corrected Google Sheets URL format
+        const googleSheetsUrl = categoryConfig.google_sheets_url;
+        const data = await axios.get(googleSheetsUrl);
+        categoryStore.mainData = data.data;
+      //  console.log(categoryStore.mainData)
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
+})
+
 </script>

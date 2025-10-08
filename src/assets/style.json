@@ -14,17 +14,25 @@
       "type": "vector",
       "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=7SGo3nVkTl7JQ90xmJ0i\t"
     },
+    "tracts-1980": {
+      "type": "geojson",
+      "data": "/geo/ChestLanTracts1980.geojson"
+    },
+    "tracts-1990": {
+      "type": "geojson",
+      "data": "/geo/ChestLanTracts1990.geojson"
+    },
     "tracts-2000": {
       "type": "geojson",
-      "data": "/ChestLanTracts2000.geojson"
+      "data": "/geo/ChestLanTracts2000.geojson"
     },
     "tracts-2010": {
       "type": "geojson",
-      "data": "/ChestLanTracts2010.geojson"
+      "data": "/geo/ChestLanTracts2010.geojson"
     },
-    "tracts-2022": {
+    "tracts-2020": {
       "type": "geojson",
-      "data": "/ChestLanTracts2022.geojson"
+      "data": "/geo/ChestLanTracts2020.geojson"
     }
   },
   "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=7SGo3nVkTl7JQ90xmJ0i\t",
@@ -823,20 +831,34 @@
       }
     },
     {
+      "id": "tracts-1980-fill",
+      "type": "fill",
+      "source": "tracts-1980",
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "fill-color": "#f2f0f7",
+        "fill-opacity": 0.65,
+        "fill-outline-color": "#888888"
+      }
+    },
+    {
+      "id": "tracts-1990-fill",
+      "type": "fill",
+      "source": "tracts-1990",
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "fill-color": "#f2f0f7",
+        "fill-opacity": 0.65,
+        "fill-outline-color": "#888888"
+      }
+    },
+    {
       "id": "tracts-2000-fill",
       "type": "fill",
       "source": "tracts-2000",
       "layout": {"visibility": "visible"},
       "paint": {
-        "fill-color": [
-          "step",
-          ["to-number", ["get", "Percent of Population 25 Years and Over whose Highest Education Completed is Less Than High School"]],
-          "#f2f0f7",
-          5, "#cbc9e2",
-          10, "#9e9ac8",
-          15, "#756bb1",
-          20, "#54278f"
-        ],
+        "fill-color": "#f2f0f7",
         "fill-opacity": 0.65,
         "fill-outline-color": "#888888"
       }
@@ -847,34 +869,18 @@
       "source": "tracts-2010",
       "layout": {"visibility": "visible"},
       "paint": {
-        "fill-color": [
-          "step",
-          ["to-number", ["get", "Percent of Population 25 Years and Over whose Highest Education Completed is Less Than High School"]],
-          "#f7fbff",
-          5, "#c6dbef",
-          10, "#6baed6",
-          15, "#3182bd",
-          20, "#08519c"
-        ],
+        "fill-color": "#f2f0f7",
         "fill-opacity": 0.65,
         "fill-outline-color": "#888888"
       }
     },
     {
-      "id": "tracts-2022-fill",
+      "id": "tracts-2020-fill",
       "type": "fill",
-      "source": "tracts-2022",
+      "source": "tracts-2020",
       "layout": {"visibility": "visible"},
       "paint": {
-        "fill-color": [
-          "step",
-          ["to-number", ["get", "Percent of Total Youth who are Disconnected (not in school & not in labor force)"]],
-          "#f7fcf5",
-          5, "#c7e9c0",
-          10, "#74c476",
-          20, "#31a354",
-          30, "#006d2c"
-        ],
+        "fill-color": "#f2f0f7",
         "fill-opacity": 0.65,
         "fill-outline-color": "#888888"
       }

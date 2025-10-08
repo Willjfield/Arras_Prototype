@@ -15,8 +15,10 @@
           </v-col>
           <v-col>
             <v-sheet class="d-flex align-content-start flex-wrap" min-height="3em">
-              <v-btn to="/map" :disabled="!cat.enabled" stacked size="small" class="ma-2" width="45%" v-for="cat in categories" :key="cat.title"
-                :text="cat.title"></v-btn>
+              <v-btn :to="`/map?${cat.query_str}`" v-for="cat in categoryStore.categories" :disabled="!cat.enabled" stacked size="small" class="ma-2" width="45%" :key="cat.title"
+                :text="cat.title" @click="handleCategoryClick(cat.query_str)">
+                {{ cat.title }}
+              </v-btn>
             </v-sheet>
           </v-col>
         </v-row>
@@ -24,31 +26,20 @@
     </v-main>
  
 </template>
-<script>
-import { useTheme } from 'vuetify';
-import { nextTick, inject } from 'vue';
-import ml from 'maplibre-gl';
+<script lang="ts" setup>
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { onBeforeMount } from 'vue';
+import { useCategoryStore } from '../stores/categoryStore';
 
-import _config_raw from '../assets/landing_page.json?raw';
-const { categories } = JSON.parse(_config_raw);
+const categoryStore = useCategoryStore();
 
+const handleCategoryClick = (queryStr: string) => {
+  categoryStore.selectCategoryByQueryStr(queryStr);
+  console.log('Selected category:', categoryStore.selectedCategory);
+};
 
-export default {
-  name: 'Landing',
-  components: {
-  },
-  data: () => ({
-    categories
-  }),
-  watch: {},
-  async mounted() {
+onBeforeMount(async () => {
+    await categoryStore.loadCategories();
+});
 
-  },
-  methods: {
-
-  }
-}
 </script>
-
-<style></style>
