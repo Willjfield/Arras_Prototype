@@ -26,7 +26,6 @@ import ComparisonMap from '../components/ComparisonMap.vue';
 import axios from 'axios';
 
 
-
 onBeforeMount(async () => {
     try {
         await categoryStore.loadCategories();
@@ -38,10 +37,15 @@ onBeforeMount(async () => {
         const mainConfig = (await axios.get('/config/main.json')).data;
         const categoryConfig = (await axios.get(categoryStore.selectedCategory.config)).data;
         
+        categoryStore.setSelectedIndicators({
+            left: categoryConfig.indicators[0],
+            right: categoryConfig.indicators[1]
+        })
         // Use the corrected Google Sheets URL format
         const googleSheetsUrl = categoryConfig.google_sheets_url;
         const data = await axios.get(googleSheetsUrl);
         categoryStore.mainData = data.data;
+
       //  console.log(categoryStore.mainData)
     } catch (error) {
         console.error('Error loading data:', error);

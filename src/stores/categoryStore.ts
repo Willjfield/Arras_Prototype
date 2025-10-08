@@ -18,6 +18,14 @@ export const useCategoryStore = defineStore('category', () => {
   const selectedCategory = ref<Category | null>(null)
   const loading = ref(false)
   const mainData = ref<string>('')
+  const selectedIndicators = ref<any>({
+    left: null,
+    right: null
+  })
+  const selectedYear = ref<any>({
+    left: 1990,
+    right: 2010
+  })
   // Actions
   const loadCategories = async () => {
     try {
@@ -47,8 +55,16 @@ export const useCategoryStore = defineStore('category', () => {
 
   const getDataFromCSVString = () =>{
     const headers = mainData.value.split('\n')[0].split(',')
-    const rows = mainData.value.split('\n').map(r => r.split(',')).slice(1)
+    const rows = mainData.value.split('\n').map(r => r.split(',').map(c => isNaN(+c) ? c : +c)).slice(1)
     return { headers, rows }
+  }
+
+  const setSelectedYear = (year: number, side: string) => {
+    selectedYear.value[side] = year
+  }
+
+  const setSelectedIndicators = (indicators: any) => {
+    selectedIndicators.value = indicators
   }
 
   // Getters
@@ -61,12 +77,16 @@ export const useCategoryStore = defineStore('category', () => {
     categories,
     selectedCategory,
     loading,
+    selectedYear,
+    selectedIndicators,
     // Actions
     loadCategories,
     selectCategoryByQueryStr,
     getCategoryByQueryStr,
     mainData,
     getDataFromCSVString,
+    setSelectedYear,
+    setSelectedIndicators,
     // Getters
     enabledCategories
   }

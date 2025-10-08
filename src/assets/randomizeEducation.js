@@ -29,4 +29,4 @@ function addNoiseToData(filePath, noiseRange, writePath) {
 }
 
 // Usage example
-addNoiseToData('education.csv', 5, 'education_noisy.csv');
+addNoiseToData('education.csv', 15, 'education_noisy.csv');

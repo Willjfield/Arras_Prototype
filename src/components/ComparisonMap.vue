@@ -8,11 +8,14 @@
 <script lang="ts" setup>
   import maplibregl from 'maplibre-gl'
   import { useCategoryStore } from '../stores/categoryStore'
-  import { onMounted, onUnmounted, ref, watch } from 'vue'
+  import { onMounted, onUnmounted, ref, watch, toRaw } from 'vue'
   import * as mapStyle from '../assets/style.json'
   import Compare from '../assets/maplibre-gl-compare.js'
   import '../assets/maplibre-gl-compare.css'
+  import axios from 'axios'
+
   const categoryStore = useCategoryStore()
+  //const selectedCategory = ref<any>(categoryStore.selectedCategory)
   const categoryData = ref<any>()
 
   const mapContainerLeft = ref<HTMLElement>()
@@ -31,25 +34,46 @@
   }>()
 
   const leftStyle: any = JSON.parse(JSON.stringify(mapStyle))
-  const layer2022 = leftStyle.layers.find((f: any) => f.id === 'tracts-2022-fill')
-
-  if (layer2022 && layer2022.layout) {
-    layer2022.layout.visibility = 'none'
-  }
-  // leftStyle.layers = leftStyle.layers.map(l => {
-  //   if (choroplethIDs.has(l.id)) {
-  //     l.paint['fill-color'] = indicators.find(i => i.field === defaultLeftIndicator)['fill-color']
-  //   }
-  //   return l
-  // })
-
   const rightStyle: any = JSON.parse(JSON.stringify(mapStyle))
-  // rightStyle.layers = rightStyle.layers.map(l => {
-  //   if (choroplethIDs.has(l.id)) {
-  //     l.paint['fill-color'] = indicators.find(i => i.field === defaultRightIndicator)['fill-color']
-  //   }
-  //   return l
-  // })
+
+  const joinData = async (side: string) => {
+    const geojson = (await axios.get('/geo/ChestLanTractsHarmonized.geojson')).data
+    const style = side === 'left' ? leftStyle : rightStyle
+    style.sources['tracts-harmonized'] = { type: 'geojson'}
+    
+    geojson.features.forEach((f: any) => {
+      const row = categoryData.value.rows.find((r: any) => r[0] === +f.properties.geoid)
+      if(row && row.length > 0){
+        const headers = categoryData.value.headers
+        const rowObject = row.reduce((acc: any, curr: any, index: number) => {
+          acc[headers[index]] = curr
+          return acc
+        }, {})
+        f.properties = {
+              ...f.properties,
+            ...rowObject
+          }
+        }
+    })
+    
+    style.sources['tracts-harmonized'].data = geojson;
+    const _fillColor = toRaw(categoryStore.selectedIndicators[side].fill_color)
+    _fillColor[2][1][1] = ''+categoryStore.selectedYear[side]//MAKE SURE THIS WORKS WITH OTHER STYLES!
+    console.log(categoryStore.selectedYear[side])
+    style.layers.push({
+      id: 'tracts-harmonized-fill',
+      type: 'fill',
+      source: 'tracts-harmonized',
+      layout: {
+        visibility: 'visible'
+      },
+      paint: {
+        'fill-color': _fillColor
+      }
+    })
+
+    side === 'left' ? leftMap?.setStyle(style) : rightMap?.setStyle(style)
+  }
 
   let _compare: Compare | null = null
   // Watch for changes in props._type and execute function based on value
@@ -58,8 +82,10 @@
   })
 
   watch(() => categoryStore.mainData, (newData, oldData) => {
+    //console.log(newData)
     categoryData.value = categoryStore.getDataFromCSVString()
-
+    joinData('left')
+    joinData('right')
   })
 
   onMounted(() => {
@@ -96,7 +122,7 @@
         if (!rightMap) return
         const features = rightMap.queryRenderedFeatures(e.point, { })
         if (features.length === 0) return
-        console.log(features[0]?.properties)
+        //console.log(features[0]?.properties)
       })
     }
 

@@ -5,17 +5,20 @@
         {
             "title": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
             "field": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
-            "geolevel":"tract"
+            "geolevel":"tract",
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#f2f0f7", 40, "#000000"]
         },
         {
             "title": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
             "field": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
-            "geolevel":"tract"
+            "geolevel":"tract",
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#f2f0f7", 40, "#000000"]
         },
         {
             "title": "Graduation Rate",
             "field": "Graduation Rate",
-            "geolevel":"school"
+            "geolevel":"school",
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#f2f0f7", 40, "#000000"]
         }
     ]
 }
