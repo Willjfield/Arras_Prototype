@@ -7,8 +7,10 @@
         @update:model-value="handleIndicatorChange" />
 
     </div>
-    <div class="tract-name">
-      {{ geoStore.getGeoSelectionLabel(side) }}
+    <div class="chart-label">
+      <span class="selected-geo">{{ geoStore.getGeoSelectionLabel(side) }}<span class="selected-color" :style="{ border: `1px solid ${selectedColorRef}` }"></span></span>
+     <br></br>
+      <span v-show="hoveredGeo" class="hovered-geo">Tract: {{ hoveredGeo }}<span class="hovered-color" :style="{ border: `1px solid ${hoveredColorRef}` }"></span></span>
     </div>
     <svg ref="svg" class="timeline-chart"></svg>
   </div>
@@ -38,6 +40,11 @@ const emit = defineEmits<{
   indicatorChanged: [indicator: any, side: 'left' | 'right']
   close: []
 }>()
+
+const selectedColor = '#2563eb';
+const hoveredColor = '#8888';
+const selectedColorRef = ref(selectedColor);
+const hoveredColorRef = ref(hoveredColor);
 
 const container = ref<HTMLElement>()
 const svg = ref<SVGElement>()
@@ -176,7 +183,7 @@ const createChart = () => {
     .attr('class', 'timeline-line')
     .attr('d', line)
     .style('fill', 'none')
-    .style('stroke', '#2563eb')
+    .style('stroke', selectedColor)
     .style('stroke-width', 2)
 
   // Add data points
@@ -188,7 +195,7 @@ const createChart = () => {
     .attr('cx', d => xScale(d.year))
     .attr('cy', d => yScale(d.value!))
     .attr('r', 4)
-    .style('fill', '#2563eb')
+    .style('fill', selectedColor)
     .style('stroke', '#fff')
     .style('stroke-width', 2)
     .style('cursor', 'pointer')
@@ -218,9 +225,9 @@ const createChart = () => {
     .style('fill', '#dc2626')
     .attr('r', 5)
 }
-
+const hoveredGeo = ref('');
 const addTractLine = (tract: string) => {
-
+  hoveredGeo.value = tract;
   if (!svg.value) return
   const data = processData(tract)
   if (data.length === 0) return
@@ -250,7 +257,7 @@ const addTractLine = (tract: string) => {
     .attr('class', 'timeline-tract-line')
     .attr('d', line)
     .style('fill', 'none')
-    .style('stroke', '#888')
+    .style('stroke', hoveredColor)
     .style('stroke-width', 1)
 
   // Add data points
@@ -262,7 +269,7 @@ const addTractLine = (tract: string) => {
     .attr('cx', d => xScale(d.year))
     .attr('cy', d => yScale(d.value!))
     .attr('r', 4)
-    .style('fill', '#2563eb')
+    .style('fill', hoveredColor)
     .style('stroke', '#fff')
     .style('stroke-width', 1)
     .style('cursor', 'pointer')
@@ -275,7 +282,6 @@ const addTractLine = (tract: string) => {
           .transition()
           .duration(200)
           .attr('r', 6)
-          .style('fill', '#1d4ed8')
       }
     })
     .on('mouseout', function (_, d) {
@@ -284,7 +290,6 @@ const addTractLine = (tract: string) => {
           .transition()
           .duration(200)
           .attr('r', 4)
-          .style('fill', '#2563eb')
       }
     })
   // Highlight selected year
@@ -479,6 +484,14 @@ onUnmounted(() => {
   border-radius: 8px 8px 0 0;
 }
 
+.chart-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 0 8px;
+  text-align: left;
+  line-height: 1.1em;
+}
 
 
 .indicator-select {
@@ -572,5 +585,29 @@ onUnmounted(() => {
 
 :deep(.data-tract-point:hover) {
   fill: #d1d1d1;
+}
+
+.selected-color {
+  display: inline-block;
+    width: 20px;
+    height: 0;
+    margin-bottom: 2.5px;
+    margin-left: 5px;
+}
+
+/* .hovered-geo {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-bottom: 2.5px;
+  margin-left: 5px;
+} */
+
+.hovered-color {
+  display: inline-block;
+    width: 20px;
+    height: 0;
+    margin-bottom: 2.5px;
+    margin-left: 5px;
 }
 </style>

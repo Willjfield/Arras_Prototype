@@ -1,7 +1,7 @@
 <template>
     <v-main class="d-flex align-center justify-center" style="">
         <v-container>
-            <ComparisonMap :_center="[-80.537, 34.7963]" :_zoom="9.57" :_type="'sideBySide'"  />
+            <ComparisonMap :_center="[-80.337, 34.7]" :_zoom="8.5" :_type="'sideBySide'"  />
         </v-container>
     </v-main>
 </template>
