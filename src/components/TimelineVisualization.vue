@@ -5,7 +5,18 @@
     :class="{ 'dragging': isDragging }"
   >
     <div class="timeline-header">
-      <span class="indicator-title">{{ selectedIndicator?.title || 'Select Indicator' }}</span>
+      <v-select
+        :model-value="selectedIndicator"
+        :items="availableIndicators"
+        item-title="title"
+        item-value="value"
+        return-object
+        density="compact"
+        variant="outlined"
+        hide-details
+        class="indicator-select"
+        @update:model-value="handleIndicatorChange"
+      />
       <button class="close-btn" @click="$emit('close')" v-if="showCloseButton">×</button>
     </div>
     <svg ref="svg" class="timeline-chart"></svg>
@@ -15,6 +26,7 @@
 <script lang="ts" setup>
 import * as d3 from 'd3'
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useGeoStore } from '../stores/geoStore'
 
 interface Props {
   categoryData: any
@@ -22,6 +34,7 @@ interface Props {
   selectedYear: number
   side: 'left' | 'right'
   showCloseButton?: boolean
+  availableIndicators: any[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -30,9 +43,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   yearSelected: [year: number]
+  indicatorChanged: [indicator: any, side: 'left' | 'right']
   close: []
 }>()
 
+const geoStore = useGeoStore()
 const container = ref<HTMLElement>()
 const svg = ref<SVGElement>()
 const isDragging = ref(false)
@@ -49,8 +64,6 @@ let initialX = 0
 let initialY = 0
 
 const processData = () => {
-  console.log(props.categoryData)
-  console.log(props.selectedIndicator)
   if (!props.categoryData || !props.selectedIndicator) return []
 
   const headers = props.categoryData.headers
@@ -61,9 +74,19 @@ const processData = () => {
     /^\d{4}$/.test(header) && !isNaN(Number(header))
   ).map((year: string) => Number(year)).sort((a: number, b: number) => a - b)
 
-  // Find the indicator field index
-  const indicatorIndex = 1; //Hardcoded into the csv
+  // Find the geography and indicator column indices
+  const geographyIndex = 0
+  const indicatorIndex = 1
+  // Get the current geography selection for this side
+  const currentGeoSelection = geoStore.getGeoSelection(props.side)
 
+  // Find the row that matches both geography and indicator
+  const matchingRow = rows.find((_row: any[]) =>
+    _row[geographyIndex] === currentGeoSelection && 
+    _row[indicatorIndex] === props.selectedIndicator.field
+  )
+
+  if (!matchingRow) return []
 
   // Extract data for this indicator
   const data: Array<{ year: number; value: number | null }> = []
@@ -71,21 +94,15 @@ const processData = () => {
   yearColumns.forEach((year: number) => {
     const yearIndex = headers.indexOf(year.toString())
     if (yearIndex !== -1) {
-      // Find a row with data for this indicator and year
-      const rowWithData = rows.find((row: any[]) => 
-        row[indicatorIndex] !== null && 
-        row[indicatorIndex] !== undefined && 
-        row[indicatorIndex] !== '' &&
-        row[yearIndex] !== null && 
-        row[yearIndex] !== undefined && 
-        row[yearIndex] !== '' &&
-        !isNaN(Number(row[yearIndex]))
-      )
+      const yearValue = matchingRow[yearIndex]
       
-      if (rowWithData) {
+      if (yearValue !== null && 
+          yearValue !== undefined && 
+          yearValue !== '' &&
+          !isNaN(Number(yearValue))) {
         data.push({
           year,
-          value: Number(rowWithData[yearIndex])
+          value: Number(yearValue)
         })
       } else {
         data.push({
@@ -95,16 +112,13 @@ const processData = () => {
       }
     }
   })
-  console.log(data)
   return data
 }
 
 const createChart = () => {
-  console.log(svg.value)
   if (!svg.value) return
 
   const data = processData()
-  console.log(data)
   if (data.length === 0) return
 
   // Clear previous chart
@@ -190,21 +204,24 @@ const createChart = () => {
     .on('click', (_, d) => {
       emit('yearSelected', d.year)
     })
-    .on('mouseover', function() {
+    .on('mouseover', function(_,d) {
+      if(d.year !== props.selectedYear){
       d3.select(this)
         .transition()
         .duration(200)
         .attr('r', 6)
         .style('fill', '#1d4ed8')
+      }
     })
-    .on('mouseout', function() {
+    .on('mouseout', function(_,d) {
+      if(d.year !== props.selectedYear){
       d3.select(this)
         .transition()
         .duration(200)
         .attr('r', 4)
         .style('fill', '#2563eb')
+      }
     })
-
   // Highlight selected year
   circles.filter(d => d.year === props.selectedYear)
     .style('fill', '#dc2626')
@@ -322,8 +339,12 @@ const endDrag = () => {
   document.removeEventListener('mouseup', endDrag)
 }
 
+const handleIndicatorChange = (indicator: any) => {
+  emit('indicatorChanged', indicator, props.side)
+}
+
 // Watch for data changes
-watch([() => props.categoryData, () => props.selectedIndicator, () => props.selectedYear], 
+watch([() => props.categoryData, () => props.selectedIndicator, () => props.selectedYear, () => geoStore.geoSelection], 
   () => {
     nextTick(() => {
       createChart()
@@ -359,7 +380,7 @@ onUnmounted(() => {
   height: 150px;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 5px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   cursor: move;
   z-index: 1000;
@@ -374,22 +395,30 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 0;
   border-bottom: 1px solid #e5e7eb;
   background: rgba(249, 250, 251, 0.8);
   border-radius: 8px 8px 0 0;
 }
 
-.indicator-title {
+
+
+.indicator-select {
+  flex: 1;
+}
+
+.indicator-select :deep(.v-field) {
   font-size: 11px;
-  font-weight: 600;
-  color: #374151;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-wrap: initial;
-    line-height: 1em;
-    max-width: none;
+  min-height: 32px;
+}
+
+.indicator-select :deep(.v-field__input) {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.indicator-select :deep(.v-select__selection) {
+  font-size: 11px;
 }
 
 .close-btn {

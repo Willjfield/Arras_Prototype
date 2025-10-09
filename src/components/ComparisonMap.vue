@@ -2,22 +2,26 @@
   <div id="comparison-container">
     <div ref="mapContainerLeft" class="map-container">
       <TimelineVisualization
-        v-if="categoryData && categoryStore.selectedIndicators.left"
+        v-if="categoryData && availableIndicators.length > 0"
         :category-data="categoryData"
         :selected-indicator="categoryStore.selectedIndicators.left"
         :selected-year="categoryStore.selectedYear.left"
+        :available-indicators="availableIndicators"
         side="left"
-        @year-selected="(year) => handleYearSelected(year, 'left')"
+        @year-selected="(year: number) => handleYearSelected(year, 'left')"
+        @indicator-changed="handleIndicatorChanged"
       />
     </div>
     <div ref="mapContainerRight" class="map-container">
       <TimelineVisualization
-        v-if="categoryData && categoryStore.selectedIndicators.right"
+        v-if="categoryData && availableIndicators.length > 0"
         :category-data="categoryData"
         :selected-indicator="categoryStore.selectedIndicators.right"
         :selected-year="categoryStore.selectedYear.right"
+        :available-indicators="availableIndicators"
         side="right"
-        @year-selected="(year) => handleYearSelected(year, 'right')"
+        @year-selected="(year: number) => handleYearSelected(year, 'right')"
+        @indicator-changed="handleIndicatorChanged"
       />
     </div>
   </div>
@@ -26,7 +30,7 @@
 <script lang="ts" setup>
   import maplibregl from 'maplibre-gl'
   import { useCategoryStore } from '../stores/categoryStore'
-  import { onMounted, onUnmounted, ref, watch, toRaw } from 'vue'
+  import { onMounted, onUnmounted, ref, watch, toRaw, computed } from 'vue'
   import * as mapStyle from '../assets/style.json'
   import Compare from '../assets/maplibre-gl-compare.js'
   import '../assets/maplibre-gl-compare.css'
@@ -60,6 +64,22 @@
     joinData(side)
   }
 
+  const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
+    categoryStore.setSelectedIndicators({
+      ...categoryStore.selectedIndicators,
+      [side]: indicator
+    })
+    joinData(side)
+  }
+
+  const availableIndicators = computed(() => {
+    if (!categoryStore.selectedCategory?.config) return []
+    
+    // This will be populated when the category config is loaded
+    // For now, return empty array - it will be updated via the store
+    return categoryStore.availableIndicators || []
+  })
+
   const joinData = async (side: string) => {
     const geojson = (await axios.get('/geo/ChestLanTractsHarmonized.geojson')).data
     const style = side === 'left' ? leftStyle : rightStyle
@@ -82,8 +102,13 @@
     
     style.sources['tracts-harmonized'].data = geojson;
     const _fillColor = toRaw(categoryStore.selectedIndicators[side].fill_color)
+
     _fillColor[2][1][1] = ''+categoryStore.selectedYear[side]//MAKE SURE THIS WORKS WITH OTHER STYLES!
 
+    const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
+    if(harmonizedLayer){
+      harmonizedLayer.paint['fill-color'] = _fillColor
+    }else{
     style.layers.push({
       id: 'tracts-harmonized-fill',
       type: 'fill',
@@ -93,28 +118,26 @@
       },
       paint: {
         'fill-color': _fillColor
-      }
-    })
-
+        }
+      })
+    }
+    console.log('joining data', harmonizedLayer)
     side === 'left' ? leftMap?.setStyle(style) : rightMap?.setStyle(style)
   }
 
   let _compare: Compare | null = null
   // Watch for changes in props._type and execute function based on value
-  watch(() => props._type, (newType) => {
+  watch(() => props._type, (newType: string) => {
     if (_compare) _compare.switchType(newType)
   })
 
   watch(() => categoryStore.mainData, () => {
-    //console.log(newData)
     categoryData.value = categoryStore.getDataFromCSVString()
     joinData('left')
     joinData('right')
   })
 
   onMounted(() => {
-    console.log('mnt')
-    console.log(categoryData.value)
     // Ensure the container is properly initialized
     if (mapContainerLeft.value) {
       
@@ -130,7 +153,6 @@
         if (!leftMap) return
         const features = leftMap.queryRenderedFeatures(e.point, { })
         if (features.length === 0) return
-        //console.log(features[0]?.properties)
       })
     }
 
@@ -146,7 +168,6 @@
         if (!rightMap) return
         const features = rightMap.queryRenderedFeatures(e.point, { })
         if (features.length === 0) return
-        //console.log(features[0]?.properties)
       })
     }
 

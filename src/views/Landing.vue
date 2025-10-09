@@ -35,7 +35,6 @@ const categoryStore = useCategoryStore();
 
 const handleCategoryClick = (queryStr: string) => {
   categoryStore.selectCategoryByQueryStr(queryStr);
-  console.log('Selected category:', categoryStore.selectedCategory);
 };
 
 onBeforeMount(async () => {
