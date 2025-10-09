@@ -6,19 +6,49 @@
             "title": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
             "field": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
             "geolevel":"tract",
-            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#f00", 40, "#ff0"]
+            "style":{
+                "min":{
+                    "color":"#f00",
+                    "value":10
+                },
+                "max":{
+                    "color":"#ff0",
+                    "value":25
+                }
+            },
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
         },
         {
             "title": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
             "field": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
             "geolevel":"tract",
-            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#00f", 40, "#f0f"]
+            "style":{
+                "min":{
+                    "color":"#0ff",
+                    "value":20
+                },
+                "max":{
+                    "color":"#f0f",
+                    "value":40
+                }
+            },
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
         },
         {
             "title": "Graduation Rate",
             "field": "Graduation Rate",
             "geolevel":"school",
-            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#f2f0f7", 40, "#000000"]
+            "style":{
+                "min":{
+                    "color":"#0ff",
+                    "value":20
+                },
+                "max":{
+                    "color":"#f0f",
+                    "value":40
+                }
+            },
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
         }
     ]
 }

@@ -20,10 +20,15 @@ export const useGeoStore = defineStore('geo', () => {
     return geoSelection.value[side]
   }
 
+  const getGeoSelectionLabel = (side: 'left' | 'right') => {
+    return !isNaN(Number(geoSelection.value[side])) ? `Census Tract: ${geoSelection.value[side]}` : 'All Lancaster and Chester Counties'
+    }
+
   return {
     geoSelection,
     setGeoSelection,
     getGeoSelection,
-    resetGeoSelection
+    resetGeoSelection,
+    getGeoSelectionLabel
   }
 })

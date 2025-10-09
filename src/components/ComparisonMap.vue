@@ -30,13 +30,14 @@
 <script lang="ts" setup>
   import maplibregl from 'maplibre-gl'
   import { useCategoryStore } from '../stores/categoryStore'
-  import { onMounted, onUnmounted, ref, watch, toRaw, computed } from 'vue'
+  import { onMounted, onUnmounted, ref, watch, toRaw, computed, inject } from 'vue'
   import * as mapStyle from '../assets/style.json'
   import Compare from '../assets/maplibre-gl-compare.js'
   import '../assets/maplibre-gl-compare.css'
   import axios from 'axios'
   import TimelineVisualization from './TimelineVisualization.vue'
-
+  //import { useEmitter } from 'mitt'
+  const emitter = inject('mitt')
   const categoryStore = useCategoryStore()
   //const selectedCategory = ref<any>(categoryStore.selectedCategory)
   const categoryData = ref<any>()
@@ -101,9 +102,13 @@
     })
     
     style.sources['tracts-harmonized'].data = geojson;
-    const _fillColor = toRaw(categoryStore.selectedIndicators[side].fill_color)
+    const layerFillStyle = categoryStore.selectedIndicators[side].style;
+    let _fillColor: any[] = toRaw(categoryStore.selectedIndicators[side].fill_color)
 
-    _fillColor[2][1][1] = ''+categoryStore.selectedYear[side]//MAKE SURE THIS WORKS WITH OTHER STYLES!
+    _fillColor = [..._fillColor,layerFillStyle.min.value,layerFillStyle.min.color,layerFillStyle.max.value,layerFillStyle.max.color]
+
+    //THIS WORKS FOR GRADIENTS BUT NOT ALL EXPRESSIONS!
+    _fillColor[2][1][1] = ''+categoryStore.selectedYear[side]
 
     const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
     if(harmonizedLayer){
@@ -121,7 +126,7 @@
         }
       })
     }
-    console.log('joining data', harmonizedLayer)
+    //console.log('joining data', harmonizedLayer)
     side === 'left' ? leftMap?.setStyle(style) : rightMap?.setStyle(style)
   }
 
@@ -151,8 +156,12 @@
 
       leftMap.on('mousemove', (e: any) => {
         if (!leftMap) return
-        const features = leftMap.queryRenderedFeatures(e.point, { })
+        const features = leftMap.queryRenderedFeatures(e.point, {
+          layers: ['tracts-harmonized-fill']
+        })
         if (features.length === 0) return
+        //console.log('features', features[0].properties.geoid)
+        emitter.emit('tract-left-selected', features[0].properties.geoid)
       })
     }
 
@@ -166,8 +175,12 @@
 
       rightMap.on('mousemove', (e: any) => {
         if (!rightMap) return
-        const features = rightMap.queryRenderedFeatures(e.point, { })
+        const features = rightMap.queryRenderedFeatures(e.point, {
+          layers: ['tracts-harmonized-fill']
+        })
         if (features.length === 0) return
+        
+        emitter.emit('tract-right-selected', features[0].properties.geoid)
       })
     }
 

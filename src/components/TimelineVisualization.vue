@@ -1,23 +1,14 @@
 <template>
-  <div 
-    ref="container" 
-    class="timeline-visualization"
-    :class="{ 'dragging': isDragging }"
-  >
+  <div ref="container" class="timeline-visualization"
+    :class="{ 'left': side === 'left', 'right': side === 'right', 'dragging': isDragging }">
     <div class="timeline-header">
-      <v-select
-        :model-value="selectedIndicator"
-        :items="availableIndicators"
-        item-title="title"
-        item-value="value"
-        return-object
-        density="compact"
-        variant="outlined"
-        hide-details
-        class="indicator-select"
-        @update:model-value="handleIndicatorChange"
-      />
-      <button class="close-btn" @click="$emit('close')" v-if="showCloseButton">×</button>
+      <v-select :model-value="selectedIndicator" :items="availableIndicators" item-title="title" item-value="value"
+        return-object density="compact" variant="outlined" hide-details class="indicator-select"
+        @update:model-value="handleIndicatorChange" />
+
+    </div>
+    <div class="tract-name">
+      {{ geoStore.getGeoSelectionLabel(side) }}
     </div>
     <svg ref="svg" class="timeline-chart"></svg>
   </div>
@@ -25,9 +16,10 @@
 
 <script lang="ts" setup>
 import * as d3 from 'd3'
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick, inject } from 'vue'
 import { useGeoStore } from '../stores/geoStore'
-
+const geoStore = useGeoStore()
+const emitter = inject('mitt')
 interface Props {
   categoryData: any
   selectedIndicator: any
@@ -47,15 +39,14 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const geoStore = useGeoStore()
 const container = ref<HTMLElement>()
 const svg = ref<SVGElement>()
 const isDragging = ref(false)
 
 let svgElement: d3.Selection<SVGElement, unknown, null, undefined>
 let width = 500
-let height = 120
-let margin = { top: 20, right: 20, bottom: 30, left: 40 }
+let height = 100
+let margin = { top: 0, right: 5, bottom: 5, left: 20 }
 
 // Dragging state
 let dragStartX = 0
@@ -63,14 +54,14 @@ let dragStartY = 0
 let initialX = 0
 let initialY = 0
 
-const processData = () => {
+const processData = (_tract: string | number | null) => {
   if (!props.categoryData || !props.selectedIndicator) return []
 
   const headers = props.categoryData.headers
   const rows = props.categoryData.rows
-  
+
   // Find year columns (numeric strings)
-  const yearColumns = headers.filter((header: string) => 
+  const yearColumns = headers.filter((header: string) =>
     /^\d{4}$/.test(header) && !isNaN(Number(header))
   ).map((year: string) => Number(year)).sort((a: number, b: number) => a - b)
 
@@ -78,28 +69,28 @@ const processData = () => {
   const geographyIndex = 0
   const indicatorIndex = 1
   // Get the current geography selection for this side
-  const currentGeoSelection = geoStore.getGeoSelection(props.side)
+  const currentGeoSelection = _tract ? _tract : geoStore.getGeoSelection(props.side)
 
   // Find the row that matches both geography and indicator
   const matchingRow = rows.find((_row: any[]) =>
-    _row[geographyIndex] === currentGeoSelection && 
+    '' + _row[geographyIndex] === '' + currentGeoSelection &&
     _row[indicatorIndex] === props.selectedIndicator.field
   )
-
+  console.log('matchingRow', matchingRow)
   if (!matchingRow) return []
 
   // Extract data for this indicator
   const data: Array<{ year: number; value: number | null }> = []
-  
+
   yearColumns.forEach((year: number) => {
     const yearIndex = headers.indexOf(year.toString())
     if (yearIndex !== -1) {
       const yearValue = matchingRow[yearIndex]
-      
-      if (yearValue !== null && 
-          yearValue !== undefined && 
-          yearValue !== '' &&
-          !isNaN(Number(yearValue))) {
+
+      if (yearValue !== null &&
+        yearValue !== undefined &&
+        yearValue !== '' &&
+        !isNaN(Number(yearValue))) {
         data.push({
           year,
           value: Number(yearValue)
@@ -118,7 +109,7 @@ const processData = () => {
 const createChart = () => {
   if (!svg.value) return
 
-  const data = processData()
+  const data = processData(null)
   if (data.length === 0) return
 
   // Clear previous chart
@@ -130,7 +121,7 @@ const createChart = () => {
 
   // Filter out null values for line chart
   const validData = data.filter(d => d.value !== null)
-  
+
   if (validData.length === 0) {
     // Just show x-axis with years
     createAxisOnly(data)
@@ -204,22 +195,22 @@ const createChart = () => {
     .on('click', (_, d) => {
       emit('yearSelected', d.year)
     })
-    .on('mouseover', function(_,d) {
-      if(d.year !== props.selectedYear){
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .attr('r', 6)
-        .style('fill', '#1d4ed8')
+    .on('mouseover', function (_, d) {
+      if (d.year !== props.selectedYear) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr('r', 6)
+          .style('fill', '#1d4ed8')
       }
     })
-    .on('mouseout', function(_,d) {
-      if(d.year !== props.selectedYear){
-      d3.select(this)
-        .transition()
-        .duration(200)
-        .attr('r', 4)
-        .style('fill', '#2563eb')
+    .on('mouseout', function (_, d) {
+      if (d.year !== props.selectedYear) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr('r', 4)
+          .style('fill', '#2563eb')
       }
     })
   // Highlight selected year
@@ -228,9 +219,82 @@ const createChart = () => {
     .attr('r', 5)
 }
 
+const addTractLine = (tract: string) => {
+
+  if (!svg.value) return
+  const data = processData(tract)
+  if (data.length === 0) return
+  console.log(svg.value)
+  svgElement = d3.select(svg.value)
+    .attr('width', width)
+    .attr('height', height)
+
+  // Filter out null values for line chart
+  const validData = data.filter(d => d.value !== null)
+
+  // Calculate scales
+  const xScale = createXScale(data)
+  const yScale = createYScale(validData)
+
+  // Create line generator
+  const line = d3.line<{ year: number; value: number | null }>()
+    .x(d => xScale(d.year))
+    .y(d => yScale(d.value!))
+    .curve(d3.curveMonotoneX)
+
+  d3.selectAll('.timeline-tract-line').remove()
+  d3.selectAll('.data-tract-point').remove()
+  // Add line
+  svgElement.append('path')
+    .datum(validData)
+    .attr('class', 'timeline-tract-line')
+    .attr('d', line)
+    .style('fill', 'none')
+    .style('stroke', '#888')
+    .style('stroke-width', 1)
+
+  // Add data points
+  const circles = svgElement.selectAll('.data-tract-point')
+    .data(validData)
+    .enter()
+    .append('circle')
+    .attr('class', 'data-tract-point')
+    .attr('cx', d => xScale(d.year))
+    .attr('cy', d => yScale(d.value!))
+    .attr('r', 4)
+    .style('fill', '#2563eb')
+    .style('stroke', '#fff')
+    .style('stroke-width', 1)
+    .style('cursor', 'pointer')
+    .on('click', (_, d) => {
+      emit('yearSelected', d.year)
+    })
+    .on('mouseover', function (_, d) {
+      if (d.year !== props.selectedYear) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr('r', 6)
+          .style('fill', '#1d4ed8')
+      }
+    })
+    .on('mouseout', function (_, d) {
+      if (d.year !== props.selectedYear) {
+        d3.select(this)
+          .transition()
+          .duration(200)
+          .attr('r', 4)
+          .style('fill', '#2563eb')
+      }
+    })
+  // Highlight selected year
+  circles.filter(d => d.year === props.selectedYear)
+    .style('fill', '#dc2626')
+    .attr('r', 5)
+}
 const createAxisOnly = (data: Array<{ year: number; value: number | null }>) => {
   const xScale = createXScale(data)
-  
+
   const xAxis = d3.axisBottom(xScale)
     .tickFormat(d => d.toString())
     .tickSize(0)
@@ -256,25 +320,25 @@ const createAxisOnly = (data: Array<{ year: number; value: number | null }>) => 
 
 const createXScale = (data: Array<{ year: number; value: number | null }>) => {
   const years = data.map(d => d.year)
-  
+
   // Create custom scale with variable spacing
   const yearPositions: number[] = []
   let currentPos = margin.left
-  
+
   for (let i = 0; i < years.length; i++) {
     yearPositions.push(currentPos)
-    
+
     if (i < years.length - 1) {
       const currentYear = years[i]
       const nextYear = years[i + 1]
       const gap = nextYear - currentYear
-      
+
       // Larger spacing for decade gaps, smaller for consecutive years
       const spacing = gap <= 1 ? 25 : gap <= 10 ? 50 : 90
       currentPos += spacing
     }
   }
-  
+
   return d3.scaleOrdinal<number, number>()
     .domain(years)
     .range(yearPositions)
@@ -283,11 +347,11 @@ const createXScale = (data: Array<{ year: number; value: number | null }>) => {
 const createYScale = (data: Array<{ year: number; value: number | null }>) => {
   const values = data.map(d => d.value!).filter(v => v !== null && !isNaN(v))
   if (values.length === 0) return d3.scaleLinear().domain([0, 100]).range([height - margin.bottom, margin.top])
-  
+
   const min = Math.min(...values)
   const max = Math.max(...values)
   const padding = (max - min) * 0.1 || 1
-  
+
   return d3.scaleLinear()
     .domain([min - padding, max + padding])
     .range([height - margin.bottom, margin.top])
@@ -296,15 +360,15 @@ const createYScale = (data: Array<{ year: number; value: number | null }>) => {
 // Dragging functionality
 const startDrag = (event: MouseEvent) => {
   if (!container.value) return
-  
+
   isDragging.value = true
   dragStartX = event.clientX
   dragStartY = event.clientY
-  
+
   const rect = container.value.getBoundingClientRect()
   initialX = rect.left
   initialY = rect.top
-  
+
   document.addEventListener('mousemove', drag)
   document.addEventListener('mouseup', endDrag)
   event.preventDefault()
@@ -312,22 +376,22 @@ const startDrag = (event: MouseEvent) => {
 
 const drag = (event: MouseEvent) => {
   if (!container.value || !isDragging.value) return
-  
+
   const deltaX = event.clientX - dragStartX
   const deltaY = event.clientY - dragStartY
-  
+
   const newX = initialX + deltaX
   const newY = initialY + deltaY
-  
+
   // Keep within map bounds (basic constraint)
   const mapContainer = container.value.parentElement
   if (mapContainer) {
     const mapRect = mapContainer.getBoundingClientRect()
     const containerRect = container.value.getBoundingClientRect()
-    
+
     const constrainedX = Math.max(0, Math.min(newX - mapRect.left, mapRect.width - containerRect.width))
     const constrainedY = Math.max(0, Math.min(newY - mapRect.top, mapRect.height - containerRect.height))
-    
+
     container.value.style.left = `${constrainedX}px`
     container.value.style.top = `${constrainedY}px`
   }
@@ -344,12 +408,12 @@ const handleIndicatorChange = (indicator: any) => {
 }
 
 // Watch for data changes
-watch([() => props.categoryData, () => props.selectedIndicator, () => props.selectedYear, () => geoStore.geoSelection], 
+watch([() => props.categoryData, () => props.selectedIndicator, () => props.selectedYear, () => geoStore.geoSelection],
   () => {
     nextTick(() => {
       createChart()
     })
-  }, 
+  },
   { deep: true }
 )
 
@@ -360,6 +424,18 @@ onMounted(() => {
   nextTick(() => {
     createChart()
   })
+  emitter.on('tract-left-selected', (tract: string) => {
+    if (props.side === 'left') {
+      addTractLine(tract)
+    }
+    console.log('tract-left-selected', tract)
+  })
+  emitter.on('tract-right-selected', (tract: string) => {
+    if (props.side === 'right') {
+      addTractLine(tract)
+    }
+    console.log('tract-right-selected', tract)
+  })
 })
 
 onUnmounted(() => {
@@ -368,6 +444,8 @@ onUnmounted(() => {
   }
   document.removeEventListener('mousemove', drag)
   document.removeEventListener('mouseup', endDrag)
+  emitter.off('tract-left-selected', addTractLine)
+  emitter.off('tract-right-selected', addTractLine)
 })
 </script>
 
@@ -377,7 +455,7 @@ onUnmounted(() => {
   bottom: 20px;
   left: 20px;
   width: 350px;
-  height: 150px;
+  height: 180px;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid #e5e7eb;
   border-radius: 5px;
@@ -468,6 +546,12 @@ onUnmounted(() => {
   stroke-width: 2;
 }
 
+:deep(.timeline-tract-line) {
+  fill: none;
+  stroke: #7d7d7d;
+  stroke-width: 2;
+}
+
 :deep(.data-point) {
   fill: #2563eb;
   stroke: #fff;
@@ -475,7 +559,18 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
+:deep(.data-tract-point) {
+  fill: #7d7d7d;
+  stroke: #fff;
+  stroke-width: 2;
+  cursor: pointer;
+}
+
 :deep(.data-point:hover) {
   fill: #1d4ed8;
+}
+
+:deep(.data-tract-point:hover) {
+  fill: #d1d1d1;
 }
 </style>
