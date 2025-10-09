@@ -9,8 +9,8 @@
     </div>
     <div class="chart-label">
       <span class="selected-geo">{{ geoStore.getGeoSelectionLabel(side) }}<span class="selected-color" :style="{ border: `1px solid ${selectedColorRef}` }"></span></span>
-     <br></br>
-      <span v-show="hoveredGeo" class="hovered-geo">Tract: {{ hoveredGeo }}<span class="hovered-color" :style="{ border: `1px solid ${hoveredColorRef}` }"></span></span>
+    
+      <span v-show="hoveredGeo" class="hovered-geo mx-2">Tract: {{ hoveredGeo }}<span class="hovered-color" :style="{ border: `1px solid ${hoveredColorRef}` }"></span></span>
     </div>
     <svg ref="svg" class="timeline-chart"></svg>
   </div>
@@ -21,7 +21,7 @@ import * as d3 from 'd3'
 import { ref, onMounted, onUnmounted, watch, nextTick, inject } from 'vue'
 import { useGeoStore } from '../stores/geoStore'
 const geoStore = useGeoStore()
-const emitter = inject('mitt')
+const emitter = inject('mitt') as any
 interface Props {
   categoryData: any
   selectedIndicator: any
@@ -51,7 +51,7 @@ const svg = ref<SVGElement>()
 const isDragging = ref(false)
 
 let svgElement: d3.Selection<SVGElement, unknown, null, undefined>
-let width = 500
+let width = 450
 let height = 100
 let margin = { top: 0, right: 5, bottom: 5, left: 20 }
 
@@ -83,7 +83,7 @@ const processData = (_tract: string | number | null) => {
     '' + _row[geographyIndex] === '' + currentGeoSelection &&
     _row[indicatorIndex] === props.selectedIndicator.field
   )
-  console.log('matchingRow', matchingRow)
+  //console.log('matchingRow', matchingRow)
   if (!matchingRow) return []
 
   // Extract data for this indicator
@@ -231,7 +231,7 @@ const addTractLine = (tract: string) => {
   if (!svg.value) return
   const data = processData(tract)
   if (data.length === 0) return
-  console.log(svg.value)
+  //console.log(svg.value)
   svgElement = d3.select(svg.value)
     .attr('width', width)
     .attr('height', height)
@@ -339,7 +339,7 @@ const createXScale = (data: Array<{ year: number; value: number | null }>) => {
       const gap = nextYear - currentYear
 
       // Larger spacing for decade gaps, smaller for consecutive years
-      const spacing = gap <= 1 ? 25 : gap <= 10 ? 50 : 90
+      const spacing = Math.sqrt(gap)*25 //<= 1 ? 25 : gap <= 10 ? 50 : 90
       currentPos += spacing
     }
   }
@@ -429,18 +429,32 @@ onMounted(() => {
   nextTick(() => {
     createChart()
   })
-  emitter.on('tract-left-selected', (tract: string) => {
-    if (props.side === 'left') {
-      addTractLine(tract)
-    }
-    console.log('tract-left-selected', tract)
-  })
-  emitter.on('tract-right-selected', (tract: string) => {
-    if (props.side === 'right') {
-      addTractLine(tract)
-    }
-    console.log('tract-right-selected', tract)
-  })
+   emitter.on('tract-left-hovered', (tract: string | null) => {
+     if (props.side === 'left') {
+       if (tract === null) {
+         // Remove tract line when no tract is selected
+         d3.selectAll('.timeline-tract-line').remove()
+         d3.selectAll('.data-tract-point').remove()
+         hoveredGeo.value = ''
+       } else {
+         addTractLine(tract)
+       }
+     }
+    // console.log('tract-left-selected', tract)
+   })
+   emitter.on('tract-right-hovered', (tract: string | null) => {
+     if (props.side === 'right') {
+       if (tract === null) {
+         // Remove tract line when no tract is selected
+         d3.selectAll('.timeline-tract-line').remove()
+         d3.selectAll('.data-tract-point').remove()
+         hoveredGeo.value = ''
+       } else {
+         addTractLine(tract)
+       }
+     }
+    //console.log('tract-right-selected', tract)
+   })
 })
 
 onUnmounted(() => {
@@ -449,8 +463,8 @@ onUnmounted(() => {
   }
   document.removeEventListener('mousemove', drag)
   document.removeEventListener('mouseup', endDrag)
-  emitter.off('tract-left-selected', addTractLine)
-  emitter.off('tract-right-selected', addTractLine)
+  emitter.off('tract-left-hovered', addTractLine)
+  emitter.off('tract-right-hovered', addTractLine)
 })
 </script>
 
@@ -459,7 +473,7 @@ onUnmounted(() => {
   position: absolute;
   bottom: 20px;
   left: 20px;
-  width: 350px;
+  width: 450px;
   height: 180px;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid #e5e7eb;

@@ -10,7 +10,7 @@
             "query_str":"edu",
             "enabled": true,
             "description": "We envision communities that offer quality elementary, secondary, post-secondary educational opportunities and academic achievement.",
-            "config": "public/config/education.json"
+            "config": "/config/education.json"
         },
         {
             "title": "TRANSITIONS TO ADULTHOOD",
