@@ -68,7 +68,7 @@ const processData = () => {
   // Extract data for this indicator
   const data: Array<{ year: number; value: number | null }> = []
   
-  yearColumns.forEach(year => {
+  yearColumns.forEach((year: number) => {
     const yearIndex = headers.indexOf(year.toString())
     if (yearIndex !== -1) {
       // Find a row with data for this indicator and year
@@ -187,17 +187,17 @@ const createChart = () => {
     .style('stroke', '#fff')
     .style('stroke-width', 2)
     .style('cursor', 'pointer')
-    .on('click', (event, d) => {
+    .on('click', (_, d) => {
       emit('yearSelected', d.year)
     })
-    .on('mouseover', function(event, d) {
+    .on('mouseover', function() {
       d3.select(this)
         .transition()
         .duration(200)
         .attr('r', 6)
         .style('fill', '#1d4ed8')
     })
-    .on('mouseout', function(event, d) {
+    .on('mouseout', function() {
       d3.select(this)
         .transition()
         .duration(200)
@@ -239,8 +239,6 @@ const createAxisOnly = (data: Array<{ year: number; value: number | null }>) => 
 
 const createXScale = (data: Array<{ year: number; value: number | null }>) => {
   const years = data.map(d => d.year)
-  const minYear = Math.min(...years)
-  const maxYear = Math.max(...years)
   
   // Create custom scale with variable spacing
   const yearPositions: number[] = []
