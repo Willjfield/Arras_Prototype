@@ -54,9 +54,11 @@ export const useCategoryStore = defineStore('category', () => {
   }
 
   const getDataFromCSVString = () =>{
-    const headers = mainData.value.split('\n')[0].split(',')
-    const rows = mainData.value.split('\n').map(r => r.split(',').map(c => isNaN(+c) ? c : +c)).slice(1)
-    return { headers, rows }
+    const headers = mainData.value.split('\n')[0].split(',').map(c => c.replace(/(\r\n|\n|\r)/gm, ""))
+    const rows = mainData.value.split('\n')
+    const splitRows = rows.map(r => r.split(',').map(c => c.replace(/(\r\n|\n|\r)/gm, "")).map(c => isNaN(+c) ? c : +c)).slice(1)
+    console.log(splitRows)
+    return { headers, rows: splitRows }
   }
 
   const setSelectedYear = (year: number, side: string) => {

@@ -12,7 +12,9 @@
   "dependencies": {
     "@mapbox/mapbox-gl-sync-move": "^0.3.1",
     "@mdi/font": "^7.4.47",
+    "@types/d3": "^7.4.3",
     "axios": "^1.12.2",
+    "d3": "^7.9.0",
     "maplibre-gl": "^5.5.0",
     "mitt": "^3.0.1",
     "pinia": "^3.0.3",

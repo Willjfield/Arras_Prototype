@@ -1,7 +1,25 @@
 <template>
   <div id="comparison-container">
-    <div ref="mapContainerLeft" class="map-container"/>
-    <div ref="mapContainerRight" class="map-container"/>
+    <div ref="mapContainerLeft" class="map-container">
+      <TimelineVisualization
+        v-if="categoryData && categoryStore.selectedIndicators.left"
+        :category-data="categoryData"
+        :selected-indicator="categoryStore.selectedIndicators.left"
+        :selected-year="categoryStore.selectedYear.left"
+        side="left"
+        @year-selected="(year) => handleYearSelected(year, 'left')"
+      />
+    </div>
+    <div ref="mapContainerRight" class="map-container">
+      <TimelineVisualization
+        v-if="categoryData && categoryStore.selectedIndicators.right"
+        :category-data="categoryData"
+        :selected-indicator="categoryStore.selectedIndicators.right"
+        :selected-year="categoryStore.selectedYear.right"
+        side="right"
+        @year-selected="(year) => handleYearSelected(year, 'right')"
+      />
+    </div>
   </div>
 </template>
 
@@ -13,6 +31,7 @@
   import Compare from '../assets/maplibre-gl-compare.js'
   import '../assets/maplibre-gl-compare.css'
   import axios from 'axios'
+  import TimelineVisualization from './TimelineVisualization.vue'
 
   const categoryStore = useCategoryStore()
   //const selectedCategory = ref<any>(categoryStore.selectedCategory)
@@ -35,6 +54,11 @@
 
   const leftStyle: any = JSON.parse(JSON.stringify(mapStyle))
   const rightStyle: any = JSON.parse(JSON.stringify(mapStyle))
+
+  const handleYearSelected = (year: number, side: 'left' | 'right') => {
+    categoryStore.setSelectedYear(year, side)
+    joinData(side)
+  }
 
   const joinData = async (side: string) => {
     const geojson = (await axios.get('/geo/ChestLanTractsHarmonized.geojson')).data
@@ -59,7 +83,7 @@
     style.sources['tracts-harmonized'].data = geojson;
     const _fillColor = toRaw(categoryStore.selectedIndicators[side].fill_color)
     _fillColor[2][1][1] = ''+categoryStore.selectedYear[side]//MAKE SURE THIS WORKS WITH OTHER STYLES!
-    console.log(categoryStore.selectedYear[side])
+
     style.layers.push({
       id: 'tracts-harmonized-fill',
       type: 'fill',
@@ -77,11 +101,11 @@
 
   let _compare: Compare | null = null
   // Watch for changes in props._type and execute function based on value
-  watch(() => props._type, (newType, oldType) => {
+  watch(() => props._type, (newType) => {
     if (_compare) _compare.switchType(newType)
   })
 
-  watch(() => categoryStore.mainData, (newData, oldData) => {
+  watch(() => categoryStore.mainData, () => {
     //console.log(newData)
     categoryData.value = categoryStore.getDataFromCSVString()
     joinData('left')
