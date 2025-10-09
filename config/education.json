@@ -6,19 +6,49 @@
             "title": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
             "field": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
             "geolevel":"tract",
-            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#f2f0f7", 40, "#000000"]
+            "style":{
+                "min":{
+                    "color":"hsla(0, 100%, 98%, 1)",
+                    "value":10
+                },
+                "max":{
+                    "color":"hsla(0, 100%, 40%, 1)",
+                    "value":25
+                }
+            },
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
         },
         {
             "title": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
             "field": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
             "geolevel":"tract",
-            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#f2f0f7", 40, "#000000"]
+            "style":{
+                "min":{
+                    "color":"hsla(180, 100%, 98%, 1)",
+                    "value":20
+                },
+                "max":{
+                    "color":"hsla(180, 100%, 40%, 1)",
+                    "value":40
+                }
+            },
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
         },
         {
             "title": "Graduation Rate",
             "field": "Graduation Rate",
             "geolevel":"school",
-            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]], 20, "#f2f0f7", 40, "#000000"]
+            "style":{
+                "min":{
+                    "color":"hsla(90, 100%, 98%, 1)",
+                    "value":20
+                },
+                "max":{
+                    "color":"hsla(90, 100%, 40%, 1)",
+                    "value":40
+                }
+            },
+            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
         }
     ]
 }
