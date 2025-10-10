@@ -24,8 +24,8 @@ import { useCategoryStore } from '../stores/categoryStore';
 const categoryStore = useCategoryStore();
 import ComparisonMap from '../components/ComparisonMap.vue';
 import axios from 'axios';
-const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
-const baseURL = (isProduction ? 'https://willjfield.github.io/Arras_Prototype/' : '.')
+//const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
+const baseURL = ''//(isProduction ? 'https://willjfield.github.io/Arras_Prototype/' : '.')
 
 onBeforeMount(async () => {
     try {

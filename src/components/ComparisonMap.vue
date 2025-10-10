@@ -51,8 +51,8 @@ const mapContainerRight = ref<HTMLElement>()
 let rightMap: maplibregl.Map | null = null
 
 const comparisonContainer = '#comparison-container'
-const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
-const baseURL = (isProduction ? 'https://willjfield.github.io/Arras_Prototype/' : '.')
+//const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
+const baseURL = ''//(isProduction ? 'https://willjfield.github.io/Arras_Prototype/' : '.')
 let geojson: any;
 onBeforeMount(async () => {
   geojson = (await axios.get(baseURL + '/geo/ChestLanTractsHarmonized.geojson')).data

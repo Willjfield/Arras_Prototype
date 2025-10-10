@@ -27,8 +27,8 @@ export const useCategoryStore = defineStore('category', () => {
     right: 2010
   })
   const availableIndicators = ref<any[]>([])
-  const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
-  const baseURL = (isProduction ? 'https://willjfield.github.io/Arras_Prototype/' : '')
+  //const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
+  const baseURL = ''//(isProduction ? 'https://willjfield.github.io/Arras_Prototype/' : '')
   // Actions
   const loadCategories = async () => {
     try {
