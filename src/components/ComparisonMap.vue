@@ -118,11 +118,12 @@ const joinData = async (side: string) => {
   
   const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
   const harmonizedOutlineLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-outline')
+  const indexOfBefore = style.layers.findIndex((layer: any) => layer.id === 'poi_label')
   if (harmonizedLayer) {
     harmonizedLayer.paint['fill-color'] = _fillColor
     harmonizedOutlineLayer.paint['line-color'] = ['case', ['==', ['get', 'geoid'], geoStore.getGeoSelection(side as 'left' | 'right')], ['literal', selectedColorRef.value], '#0000']
   } else {
-    style.layers.push({
+    const fillLayer = {
       id: 'tracts-harmonized-fill',
       type: 'fill',
       source: 'tracts-harmonized',
@@ -130,10 +131,18 @@ const joinData = async (side: string) => {
         visibility: 'visible'
       },
       paint: {
-        'fill-color': _fillColor
+        'fill-color': _fillColor,
+        'fill-opacity': { 
+          'stops': [
+            // zoom is 5 -> circle radius will be 1px
+            [10, 1],
+            // zoom is 10 -> circle radius will be 2px
+            [12, .65]
+        ]}
       }
-    })
-    style.layers.push({
+    }
+    
+    const outlineLayer = {
       id: 'tracts-harmonized-outline',
       type: 'line',
       source: 'tracts-harmonized',
@@ -144,7 +153,9 @@ const joinData = async (side: string) => {
         'line-width': 2,
         'line-color': ['case', ['==', ['get', 'geoid'], geoStore.getGeoSelection(side as 'left' | 'right')], ['literal', '#000f'], '#0000']
       }
-    })
+    }
+    style.layers.splice(indexOfBefore-2, 0, fillLayer)
+    style.layers.splice(indexOfBefore-1, 0, outlineLayer)
   }
   //console.log('joining data', harmonizedLayer)
   side === 'left' ? leftMap?.setStyle(style) : rightMap?.setStyle(style)

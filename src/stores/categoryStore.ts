@@ -23,8 +23,8 @@ export const useCategoryStore = defineStore('category', () => {
     right: null
   })
   const selectedYear = ref<any>({
-    left: 1990,
-    right: 2010
+    left: 2023,
+    right: 2023
   })
   const availableIndicators = ref<any[]>([])
   //const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
@@ -56,10 +56,15 @@ export const useCategoryStore = defineStore('category', () => {
     return categories.value.find(cat => cat.query_str === queryStr)
   }
 
+  //const inactiveYears = [2022, 2021];
   const getDataFromCSVString = () =>{
-    const headers = mainData.value.split('\n')[0].split(',').map(c => c.replace(/(\r\n|\n|\r)/gm, ""))
+    let headers = mainData.value.split('\n')[0].split(',').map(c => c.replace(/(\r\n|\n|\r)/gm, ""))
+    //const indicesOfInactiveYears = inactiveYears.map(year => headers.indexOf(year.toString()))
     const rows = mainData.value.split('\n')
-    const splitRows = rows.map(r => r.split(',').map(c => c.replace(/(\r\n|\n|\r)/gm, "")).map(c => isNaN(+c) ? c : +c)).slice(1)
+    let splitRows = rows.map(r => r.split(',').map(c => c.replace(/(\r\n|\n|\r)/gm, "")).map(c => isNaN(+c) ? c : +c)).slice(1)
+   
+   // headers = headers.filter((h,i) => !indicesOfInactiveYears.includes(i))
+   // splitRows = splitRows.filter((r,i) => !indicesOfInactiveYears.includes(i))
 
     return { headers, rows: splitRows }
   }
