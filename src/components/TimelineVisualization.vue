@@ -127,8 +127,8 @@ const createChart = () => {
     .attr('height', height)
 
   // Filter out null values for line chart
-  const validData = data.filter(d => d.value !== null)
-
+  const validData = data.filter(d => d.value !== null && d.value > -1)
+  console.log('validData', validData)
   if (validData.length === 0) {
     // Just show x-axis with years
     createAxisOnly(data)
@@ -237,7 +237,7 @@ const addTractLine = (tract: string) => {
     .attr('height', height)
 
   // Filter out null values for line chart
-  const validData = data.filter(d => d.value !== null)
+  const validData = data.filter(d => d.value !== null && d.value > -1)
 
   // Calculate scales
   const xScale = createXScale(data)
