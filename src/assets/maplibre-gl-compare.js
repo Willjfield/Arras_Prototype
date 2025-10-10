@@ -122,7 +122,6 @@ Compare.prototype = {
   },
 
   _onMove (e) {
-    console.log('on move')
     if (this.options && this.options.mousemove) {
       this._setPointerEvents(e.touches ? 'auto' : 'none')
     }

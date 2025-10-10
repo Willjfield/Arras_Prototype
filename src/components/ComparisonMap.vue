@@ -27,7 +27,7 @@
 import maplibregl from 'maplibre-gl'
 import { useCategoryStore } from '../stores/categoryStore'
 import { useGeoStore } from '../stores/geoStore'
-import { onMounted, onUnmounted, ref, watch, toRaw, computed, inject } from 'vue'
+import { onMounted, onUnmounted, ref, watch, toRaw, computed } from 'vue'
 import * as mapStyle from '../assets/style.json'
 import Compare from '../assets/maplibre-gl-compare.js'
 import '../assets/maplibre-gl-compare.css'
@@ -36,6 +36,7 @@ import TimelineVisualization from './TimelineVisualization.vue'
 import ColorLegend from './ColorLegend.vue'
 import { onBeforeMount } from 'vue'
 //import { useEmitter } from 'mitt'
+import { inject } from 'vue'
 const emitter = inject('mitt') as any
 const categoryStore = useCategoryStore()
 const geoStore = useGeoStore()
@@ -50,10 +51,11 @@ const mapContainerRight = ref<HTMLElement>()
 let rightMap: maplibregl.Map | null = null
 
 const comparisonContainer = '#comparison-container'
-
+const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
+const baseURL = (isProduction ? 'https://willjfield.github.io/Arras_Prototype/' : '.')
 let geojson: any;
 onBeforeMount(async () => {
-  geojson = (await axios.get(inject('baseURL') + '/geo/ChestLanTractsHarmonized.geojson')).data
+  geojson = (await axios.get(baseURL + '/geo/ChestLanTractsHarmonized.geojson')).data
 })
 // Define props with default values if needed
 const props = defineProps<{

@@ -1,5 +1,5 @@
   import { defineStore } from 'pinia'
-  import { ref, inject } from 'vue'
+  import { ref } from 'vue'
 import axios from 'axios'
 
 export interface Category {
@@ -27,11 +27,13 @@ export const useCategoryStore = defineStore('category', () => {
     right: 2010
   })
   const availableIndicators = ref<any[]>([])
+  const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
+  const baseURL = (isProduction ? 'https://willjfield.github.io/Arras_Prototype/' : '')
   // Actions
   const loadCategories = async () => {
     try {
       loading.value = true
-      const response = await axios.get(inject('baseURL') + '/config/main.json')
+      const response = await axios.get(baseURL + '/config/main.json')
       categories.value = response.data.categories
       selectCategoryByQueryStr(window.location.search.replace('?', ''))
     } catch (error) {

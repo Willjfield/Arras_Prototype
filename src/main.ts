@@ -11,8 +11,10 @@ const app = createApp(App)
 const pinia = createPinia()
 app.provide('mitt', emitter)
 
-const historyString = process.env.NODE_ENV === 'production' ? '/Arras_Prototype/' : '';
-app.provide('baseURL', process.env.NODE_ENV === 'production' ? 'https://willjfield.github.io/Arras_Prototype/' : '')
+//console.log('process.env.NODE_ENV', process?.env?.NODE_ENV, isProduction);
+const isProduction = typeof process !== 'undefined' && typeof  process?.env !== 'undefined' && process?.env?.NODE_ENV === 'production';
+const historyString = isProduction ? '/Arras_Prototype/' : '';
+
 
 const router = createRouter({
     history: createWebHistory(historyString),
