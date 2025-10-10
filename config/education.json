@@ -35,9 +35,9 @@
             "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
         },
         {
-            "title": "Graduation Rate",
-            "field": "Graduation Rate",
-            "geolevel":"school",
+            "title": "Percent of 3 and 4 Year Olds enrolled in Pre-K",
+            "field": "Percent of 3 and 4 Year Olds enrolled in Pre-K",
+            "geolevel":"tract",
             "style":{
                 "min":{
                     "color":"hsla(90, 100%, 98%, 1)",
