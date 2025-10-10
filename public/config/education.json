@@ -35,8 +35,8 @@
             "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
         },
         {
-            "title": "Percent of 3 and 4 Year Olds enrolled in Daycare",
-            "field": "Percent of 3 and 4 Year Olds enrolled in Daycare",
+            "title": "Percent of 3 and 4 Year Olds enrolled in Pre-K",
+            "field": "Percent of 3 and 4 Year Olds enrolled in Pre-K",
             "geolevel":"tract",
             "style":{
                 "min":{
