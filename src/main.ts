@@ -12,6 +12,8 @@ const pinia = createPinia()
 app.provide('mitt', emitter)
 
 const historyString = process.env.NODE_ENV === 'production' ? '/Arras_Prototype/' : '';
+app.provide('baseURL', process.env.NODE_ENV === 'production' ? 'https://willjfield.github.io/Arras_Prototype/' : '')
+
 const router = createRouter({
     history: createWebHistory(historyString),
     routes: [

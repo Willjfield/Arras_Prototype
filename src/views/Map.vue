@@ -19,7 +19,7 @@
 <script type="ts" setup>
 import ml from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { ref, onBeforeMount } from 'vue';
+import { ref, onBeforeMount, inject } from 'vue';
 import { useCategoryStore } from '../stores/categoryStore';
 const categoryStore = useCategoryStore();
 import ComparisonMap from '../components/ComparisonMap.vue';
@@ -34,8 +34,8 @@ onBeforeMount(async () => {
             return;
         }
 
-        const mainConfig = (await axios.get('public/config/main.json')).data;
-        const categoryConfig = (await axios.get(categoryStore.selectedCategory.config)).data;
+        const mainConfig = (await axios.get(inject('baseURL') +'/config/main.json')).data;
+        const categoryConfig = (await axios.get(inject('baseURL') + categoryStore.selectedCategory.config)).data;
         
         // Set available indicators
         categoryStore.setAvailableIndicators(categoryConfig.indicators);

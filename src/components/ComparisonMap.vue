@@ -53,7 +53,7 @@ const comparisonContainer = '#comparison-container'
 
 let geojson: any;
 onBeforeMount(async () => {
-  geojson = (await axios.get('public/geo/ChestLanTractsHarmonized.geojson')).data
+  geojson = (await axios.get(inject('baseURL') + '/geo/ChestLanTractsHarmonized.geojson')).data
 })
 // Define props with default values if needed
 const props = defineProps<{

@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+  import { defineStore } from 'pinia'
+  import { ref, inject } from 'vue'
 import axios from 'axios'
 
 export interface Category {
@@ -31,7 +31,7 @@ export const useCategoryStore = defineStore('category', () => {
   const loadCategories = async () => {
     try {
       loading.value = true
-      const response = await axios.get('public/config/main.json')
+      const response = await axios.get(inject('baseURL') + '/config/main.json')
       categories.value = response.data.categories
       selectCategoryByQueryStr(window.location.search.replace('?', ''))
     } catch (error) {
