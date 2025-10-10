@@ -34,7 +34,7 @@ onBeforeMount(async () => {
             return;
         }
 
-        const mainConfig = (await axios.get('/config/main.json')).data;
+        const mainConfig = (await axios.get('public/config/main.json')).data;
         const categoryConfig = (await axios.get(categoryStore.selectedCategory.config)).data;
         
         // Set available indicators

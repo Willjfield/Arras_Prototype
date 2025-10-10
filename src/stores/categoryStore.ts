@@ -31,7 +31,7 @@ export const useCategoryStore = defineStore('category', () => {
   const loadCategories = async () => {
     try {
       loading.value = true
-      const response = await axios.get('/config/main.json')
+      const response = await axios.get('public/config/main.json')
       categories.value = response.data.categories
       selectCategoryByQueryStr(window.location.search.replace('?', ''))
     } catch (error) {
