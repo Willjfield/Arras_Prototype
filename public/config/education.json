@@ -68,6 +68,12 @@
             "geolevel":"point",
             "layers":{
                 "main":"quality-childcare"
+            },
+            "icons":{
+                "main":{
+                    "name":"childcare",
+                    "filename":"assets/icons/childcare.png"
+                }
             }
         }
     ]

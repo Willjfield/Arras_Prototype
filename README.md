@@ -11,7 +11,7 @@ This template should help get you started developing with Vue 3 and TypeScript i
 Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
 
 TODOS from 10/14 call:
-Examples of similar dashboards (embedded)
+--- Examples of similar dashboards (embedded) ---
 Does it work to use ranges for, eg. 2006-2010?
 Hover popups with totals on map and trend line - ideally like "## out of #,###"
 dot density? for totals on map?

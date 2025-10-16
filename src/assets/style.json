@@ -707,14 +707,15 @@
     },
     {
       "id":"quality-childcare",
-      "type": "circle",
+      "type": "symbol",
       "source": "quality-childcare-source",
       "layout": {
-        "visibility": "none"
+        "visibility": "none",
+        "icon-size": 0.75,
+        "icon-allow-overlap": true
       },
       "paint": {
-        "circle-radius": 4,
-        "circle-color": "#3388ff"
+        "icon-color": "#888"
       }
     },
     {

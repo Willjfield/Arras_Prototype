@@ -33,7 +33,9 @@ import axios from 'axios'
 import TimelineVisualization from './TimelineVisualization.vue'
 import ColorLegend from './ColorLegend.vue'
 import { onBeforeMount } from 'vue'
-import {assignChoroplethListeners, removeChoroplethListeners} from '../assets/MapEvents'
+
+import {assignChoroplethListeners, removeChoroplethListeners} from '../assets/ChoroplethEvents.js'
+import {assignPointListeners, removePointListeners} from '../assets/PointLayerEvents.js'
 //import { useEmitter } from 'mitt'
 import { inject } from 'vue'
 const emitter = inject('mitt') as any
@@ -78,13 +80,32 @@ const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
   })
   joinData(side)
   const geolevel = categoryStore.selectedIndicators[side].geolevel
+  const mainLayer = categoryStore.selectedIndicators[side].layers.main
   const _map = side === 'left' ? leftMap : rightMap
+  const icons = categoryStore.selectedIndicators[side].icons
+  //if(icons && icons.length > 0) {
+   // icons.forEach((icon: any) => {
+      _map.loadImage(icons.main.filename).then((image: any) => {
+        if(!_map.hasImage(icons.main.name)) {
+          _map.addImage(icons.main.name, image.data);
+        }
+
+        _map.setLayoutProperty(mainLayer, 'icon-image', icons.main.name);
+        _map.setLayoutProperty(mainLayer, 'visibility', 'visible');
+        console.log(_map.getStyle().layers.find((layer: any) => layer.id === mainLayer))
+
+      })
+   // })
+  //}
+
   switch (geolevel) {
     case 'tract':
+      removePointListeners(_map, side)
       assignChoroplethListeners(_map, side, emitter)
       break
     case 'point':
-      //TODO: assignPointListeners(_map, side, emitter)
+      removeChoroplethListeners(_map, side)
+      assignPointListeners(_map, side, emitter)
       break
   }
 
@@ -176,8 +197,20 @@ watch(() => categoryStore.mainData, (val: any) => {
   categoryData.value = categoryStore.getDataFromCSVString()
   joinData('left')
   joinData('right')
-  assignChoroplethListeners(leftMap as any, 'left', emitter)
-  assignChoroplethListeners(rightMap as any, 'right', emitter)
+  if(categoryStore.selectedIndicators.left.geolevel === 'tract') {
+    removePointListeners(leftMap as any, 'left')
+    assignChoroplethListeners(leftMap as any, 'left', emitter)
+  } else {
+    removeChoroplethListeners(leftMap as any, 'left')
+    assignPointListeners(leftMap as any, 'left', emitter)
+  }
+  if(categoryStore.selectedIndicators.right.geolevel === 'tract') {
+    removePointListeners(rightMap as any, 'right')
+    assignChoroplethListeners(rightMap as any, 'right', emitter)
+  } else {
+    removeChoroplethListeners(rightMap as any, 'right')
+    assignPointListeners(rightMap as any, 'right', emitter)
+  }
 })
 
 const setupMap = (container: HTMLElement, style: any, side: 'left' | 'right') => {

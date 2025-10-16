@@ -5,7 +5,7 @@ const geoStore = useGeoStore()
 const selectedColor = '#2563eb';
 
 function onChoroplethClick(map, side, e, emitter) {
-    console.log('CLICK', side)
+
     if (!map) return
     const features = map.queryRenderedFeatures(e.point, {
         layers: [categoryStore.selectedIndicators[side].layers.main]
