@@ -5,11 +5,12 @@ const geoStore = useGeoStore()
 const selectedColor = '#2563eb';
 
 function onChoroplethClick(map, side, e, emitter) {
-    console.log('CLICK')
+    console.log('CLICK', side)
     if (!map) return
     const features = map.queryRenderedFeatures(e.point, {
         layers: [categoryStore.selectedIndicators[side].layers.main]
     })
+
     if (features.length === 0 || features[0].properties.geoid === geoStore.getGeoSelection(side)) {
         geoStore.setGeoSelection('total', side)
         if (categoryStore.selectedIndicators[side].geolevel === 'tract') {

@@ -77,9 +77,17 @@ const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
     [side]: indicator
   })
   joinData(side)
+  const geolevel = categoryStore.selectedIndicators[side].geolevel
   const _map = side === 'left' ? leftMap : rightMap
-  assignChoroplethListeners(_map, side, emitter)
-  //assignChoroplethListeners(_map as any, side, emitter)
+  switch (geolevel) {
+    case 'tract':
+      assignChoroplethListeners(_map, side, emitter)
+      break
+    case 'point':
+      //TODO: assignPointListeners(_map, side, emitter)
+      break
+  }
+
 }
 
 const availableIndicators = computed(() => {
@@ -92,6 +100,7 @@ const availableIndicators = computed(() => {
 
 const joinData = async (side: string) => {
   const style = side === 'left' ? leftStyle : rightStyle
+  const _map = side === 'left' ? leftMap : rightMap
   const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
   const harmonizedOutlineLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-outline')
   const qualityChildcareLayer = style.layers.find((layer: any) => layer.id === 'quality-childcare')
@@ -101,6 +110,7 @@ const joinData = async (side: string) => {
    if(categoryStore.selectedIndicators[side].geolevel === 'point') {
      qualityChildcareLayer.layout.visibility = 'visible'
    }
+   removeChoroplethListeners(_map as any, side)
   } else {
     harmonizedLayer.layout.visibility = 'visible'
     harmonizedOutlineLayer.layout.visibility = 'visible'
@@ -153,11 +163,7 @@ const joinData = async (side: string) => {
     }
     
   }
-  //style.layers.splice(indexOfBefore - 2, 0, harmonizedLayer)
-  //style.layers.splice(indexOfBefore - 1, 0, harmonizedOutlineLayer)
-
-  //console.log('joining data', harmonizedLayer)
-  side === 'left' ? leftMap?.setStyle(style) : rightMap?.setStyle(style)
+  _map.setStyle(style)
 }
 
 let _compare: Compare | null = null
@@ -170,8 +176,8 @@ watch(() => categoryStore.mainData, (val: any) => {
   categoryData.value = categoryStore.getDataFromCSVString()
   joinData('left')
   joinData('right')
-  assignChoroplethListeners(leftMap, 'left', emitter)
-  assignChoroplethListeners(rightMap, 'right', emitter)
+  assignChoroplethListeners(leftMap as any, 'left', emitter)
+  assignChoroplethListeners(rightMap as any, 'right', emitter)
 })
 
 const setupMap = (container: HTMLElement, style: any, side: 'left' | 'right') => {
@@ -209,11 +215,11 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (leftMap) {
-    removeChoroplethListeners(leftMap, 'left', emitter)
+    removeChoroplethListeners(leftMap as any, 'left')
     leftMap.remove()
   }
   if (rightMap) {
-    removeChoroplethListeners(rightMap, 'right', emitter)
+    removeChoroplethListeners(rightMap as any, 'right')
     rightMap.remove()
   }
 })
