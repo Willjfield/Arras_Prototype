@@ -1,18 +1,19 @@
 <template>
   <div ref="container" class="timeline-visualization"
-    :class="{ 'left': side === 'left', 'right': side === 'right', 'dragging': isDragging }">
+    :class="{ 'left': side === 'left', 'right': side === 'right'}"
+    :style="{ height: props.selectedIndicator.geolevel === 'tract' ? '180px' : '0px', bottom: props.selectedIndicator.geolevel === 'tract' ? '20px' : '50px' }">
     <div class="timeline-header">
       <v-select :model-value="selectedIndicator" :items="availableIndicators" item-title="title" item-value="value"
         return-object density="compact" variant="outlined" hide-details class="indicator-select"
         @update:model-value="handleIndicatorChange" />
 
     </div>
-    <div class="chart-label">
+    <div class="chart-label" v-show="selectedIndicator.geolevel === 'tract'">
       <span class="selected-geo">{{ geoStore.getGeoSelectionLabel(side) }}<span class="selected-color" :style="{ border: `1px solid ${selectedColorRef}` }"></span></span>
     
       <span v-show="hoveredGeo" class="hovered-geo mx-2">Tract: {{ hoveredGeo }}<span class="hovered-color" :style="{ border: `1px solid ${hoveredColorRef}` }"></span></span>
     </div>
-    <svg ref="svg" class="timeline-chart"></svg>
+    <svg ref="svg" class="timeline-chart" v-show="selectedIndicator.geolevel === 'tract'"></svg>
   </div>
 </template>
 
@@ -48,18 +49,11 @@ const hoveredColorRef = ref(hoveredColor);
 
 const container = ref<HTMLElement>()
 const svg = ref<SVGElement>()
-const isDragging = ref(false)
 
 let svgElement: d3.Selection<SVGElement, unknown, null, undefined>
 let width = 450
 let height = 100
 let margin = { top: 0, right: 5, bottom: 5, left: 20 }
-
-// Dragging state
-let dragStartX = 0
-let dragStartY = 0
-let initialX = 0
-let initialY = 0
 
 const processData = (_tract: string | number | null) => {
   if (!props.categoryData || !props.selectedIndicator) return []
@@ -362,52 +356,6 @@ const createYScale = (data: Array<{ year: number; value: number | null }>) => {
     .range([height - margin.bottom, margin.top])
 }
 
-// Dragging functionality
-const startDrag = (event: MouseEvent) => {
-  if (!container.value) return
-
-  isDragging.value = true
-  dragStartX = event.clientX
-  dragStartY = event.clientY
-
-  const rect = container.value.getBoundingClientRect()
-  initialX = rect.left
-  initialY = rect.top
-
-  document.addEventListener('mousemove', drag)
-  document.addEventListener('mouseup', endDrag)
-  event.preventDefault()
-}
-
-const drag = (event: MouseEvent) => {
-  if (!container.value || !isDragging.value) return
-
-  const deltaX = event.clientX - dragStartX
-  const deltaY = event.clientY - dragStartY
-
-  const newX = initialX + deltaX
-  const newY = initialY + deltaY
-
-  // Keep within map bounds (basic constraint)
-  const mapContainer = container.value.parentElement
-  if (mapContainer) {
-    const mapRect = mapContainer.getBoundingClientRect()
-    const containerRect = container.value.getBoundingClientRect()
-
-    const constrainedX = Math.max(0, Math.min(newX - mapRect.left, mapRect.width - containerRect.width))
-    const constrainedY = Math.max(0, Math.min(newY - mapRect.top, mapRect.height - containerRect.height))
-
-    container.value.style.left = `${constrainedX}px`
-    container.value.style.top = `${constrainedY}px`
-  }
-}
-
-const endDrag = () => {
-  isDragging.value = false
-  document.removeEventListener('mousemove', drag)
-  document.removeEventListener('mouseup', endDrag)
-}
-
 const handleIndicatorChange = (indicator: any) => {
   emit('indicatorChanged', indicator, props.side)
 }
@@ -423,9 +371,7 @@ watch([() => props.categoryData, () => props.selectedIndicator, () => props.sele
 )
 
 onMounted(() => {
-  if (container.value) {
-    container.value.addEventListener('mousedown', startDrag)
-  }
+  
   nextTick(() => {
     createChart()
   })
@@ -458,11 +404,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (container.value) {
-    container.value.removeEventListener('mousedown', startDrag)
-  }
-  document.removeEventListener('mousemove', drag)
-  document.removeEventListener('mouseup', endDrag)
   emitter.off('tract-left-hovered', addTractLine)
   emitter.off('tract-right-hovered', addTractLine)
 })
@@ -471,10 +412,9 @@ onUnmounted(() => {
 <style scoped>
 .timeline-visualization {
   position: absolute;
-  bottom: 20px;
   left: 20px;
   width: 450px;
-  height: 180px;
+  
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid #e5e7eb;
   border-radius: 5px;
@@ -482,10 +422,6 @@ onUnmounted(() => {
   cursor: move;
   z-index: 1000;
   user-select: none;
-}
-
-.timeline-visualization.dragging {
-  cursor: grabbing;
 }
 
 .timeline-header {

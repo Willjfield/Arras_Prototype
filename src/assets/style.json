@@ -17,6 +17,14 @@
     "tracts-2020": {
       "type": "geojson",
       "data": "/geo/ChestLanTracts2020.geojson"
+    },
+    "quality-childcare-source": {
+      "type": "geojson",
+      "data": "/geo/Quality_Childcare.geojson"
+    },
+    "tracts-harmonized": {
+      "type": "geojson",
+      "data": "/geo/ChestLanTractsHarmonized.geojson"
     }
   },
   "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=7SGo3nVkTl7JQ90xmJ0i\t",
@@ -645,6 +653,35 @@
       }
     },
     {
+      "id": "tracts-harmonized-fill",
+      "type": "fill",
+      "source": "tracts-harmonized",
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-color": "#3388ff",
+        "fill-opacity": {
+          "stops": [
+            [10, 1],
+            [12, 0.65]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tracts-harmonized-outline",
+      "type": "line",
+      "source": "tracts-harmonized",
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-width": 2,
+        "line-color": "#0000"
+      }
+    },
+    {
       "id": "poi_label",
       "type": "symbol",
       "source": "openmaptiles",
@@ -666,6 +703,18 @@
         "text-halo-blur": 1,
         "text-halo-color": "rgba(255,255,255,0.75)",
         "text-halo-width": 1
+      }
+    },
+    {
+      "id":"quality-childcare",
+      "type": "circle",
+      "source": "quality-childcare-source",
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "circle-radius": 4,
+        "circle-color": "#3388ff"
       }
     },
     {

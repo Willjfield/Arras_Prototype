@@ -7,8 +7,7 @@
         @year-selected="(year: number) => handleYearSelected(year, 'left')"
         @indicator-changed="handleIndicatorChanged" />
       <ColorLegend v-if="categoryData && availableIndicators.length > 0"
-        :selected-indicator="categoryStore.selectedIndicators.left"
-        side="left" />
+        :selected-indicator="categoryStore.selectedIndicators.left" side="left" />
     </div>
     <div ref="mapContainerRight" class="map-container">
       <TimelineVisualization v-if="categoryData && availableIndicators.length > 0" :category-data="categoryData"
@@ -17,8 +16,7 @@
         @year-selected="(year: number) => handleYearSelected(year, 'right')"
         @indicator-changed="handleIndicatorChanged" />
       <ColorLegend v-if="categoryData && availableIndicators.length > 0"
-        :selected-indicator="categoryStore.selectedIndicators.right"
-        side="right" />
+        :selected-indicator="categoryStore.selectedIndicators.right" side="right" />
     </div>
   </div>
 </template>
@@ -35,6 +33,7 @@ import axios from 'axios'
 import TimelineVisualization from './TimelineVisualization.vue'
 import ColorLegend from './ColorLegend.vue'
 import { onBeforeMount } from 'vue'
+import {assignChoroplethListeners, removeChoroplethListeners} from '../assets/MapEvents'
 //import { useEmitter } from 'mitt'
 import { inject } from 'vue'
 const emitter = inject('mitt') as any
@@ -78,6 +77,9 @@ const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
     [side]: indicator
   })
   joinData(side)
+  const _map = side === 'left' ? leftMap : rightMap
+  assignChoroplethListeners(_map, side, emitter)
+  //assignChoroplethListeners(_map as any, side, emitter)
 }
 
 const availableIndicators = computed(() => {
@@ -90,73 +92,70 @@ const availableIndicators = computed(() => {
 
 const joinData = async (side: string) => {
   const style = side === 'left' ? leftStyle : rightStyle
-  style.sources['tracts-harmonized'] = { type: 'geojson' }
-
-  geojson.features.forEach((f: any) => {
-    const row = categoryData.value.rows.find((r: any) => r[0] === +f.properties.geoid)
-    if (row && row.length > 0) {
-      const headers = categoryData.value.headers
-      const rowObject = row.reduce((acc: any, curr: any, index: number) => {
-        acc[headers[index]] = curr
-        return acc
-      }, {})
-      f.properties = {
-        ...f.properties,
-        ...rowObject
-      }
-    }
-  })
-
-  style.sources['tracts-harmonized'].data = geojson;
-  const layerFillStyle = categoryStore.selectedIndicators[side].style;
-  let _fillColor: any[] = toRaw(categoryStore.selectedIndicators[side].fill_color)
-
-  _fillColor = [..._fillColor, layerFillStyle.min.value, layerFillStyle.min.color, layerFillStyle.max.value, layerFillStyle.max.color]
-
-  //THIS WORKS FOR GRADIENTS BUT NOT ALL EXPRESSIONS!
-  _fillColor[2][1][1] = '' + categoryStore.selectedYear[side]
-  
   const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
   const harmonizedOutlineLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-outline')
-  const indexOfBefore = style.layers.findIndex((layer: any) => layer.id === 'poi_label')
-  if (harmonizedLayer) {
-    harmonizedLayer.paint['fill-color'] = _fillColor
-    harmonizedOutlineLayer.paint['line-color'] = ['case', ['==', ['get', 'geoid'], geoStore.getGeoSelection(side as 'left' | 'right')], ['literal', selectedColorRef.value], '#0000']
+  const qualityChildcareLayer = style.layers.find((layer: any) => layer.id === 'quality-childcare')
+  if (categoryStore.selectedIndicators[side].geolevel !== 'tract') {
+    harmonizedLayer.layout.visibility = 'none'
+    harmonizedOutlineLayer.layout.visibility = 'none'
+   if(categoryStore.selectedIndicators[side].geolevel === 'point') {
+     qualityChildcareLayer.layout.visibility = 'visible'
+   }
   } else {
-    const fillLayer = {
-      id: 'tracts-harmonized-fill',
-      type: 'fill',
-      source: 'tracts-harmonized',
-      layout: {
-        visibility: 'visible'
-      },
-      paint: {
+    harmonizedLayer.layout.visibility = 'visible'
+    harmonizedOutlineLayer.layout.visibility = 'visible'
+    qualityChildcareLayer.layout.visibility = 'none'
+    geojson.features.forEach((f: any) => {
+      const row = categoryData.value.rows.find((r: any) => r[0] === +f.properties.geoid)
+      if (row && row.length > 0) {
+        const headers = categoryData.value.headers
+        const rowObject = row.reduce((acc: any, curr: any, index: number) => {
+          acc[headers[index]] = curr
+          return acc
+        }, {})
+        f.properties = {
+          ...f.properties,
+          ...rowObject
+        }
+      }
+    })
+    style.sources['tracts-harmonized'] = { type: 'geojson' }
+
+    style.sources['tracts-harmonized'].data = geojson;
+    const layerFillStyle = categoryStore.selectedIndicators[side].style;
+    let _fillColor: any[] = toRaw(categoryStore.selectedIndicators[side].fill_color)
+
+    _fillColor = [..._fillColor, layerFillStyle.min.value, layerFillStyle.min.color, layerFillStyle.max.value, layerFillStyle.max.color]
+
+    //THIS WORKS FOR GRADIENTS BUT NOT ALL EXPRESSIONS!
+    _fillColor[2][1][1] = '' + categoryStore.selectedYear[side]
+
+    if (harmonizedLayer) {
+      harmonizedLayer.paint['fill-color'] = _fillColor
+      harmonizedOutlineLayer.paint['line-color'] = ['case', ['==', ['get', 'geoid'], geoStore.getGeoSelection(side as 'left' | 'right')], ['literal', selectedColor], '#0000']
+    } else {
+      //TODO: Put these in style.json and just style them here
+      harmonizedLayer.paint = {
         'fill-color': _fillColor,
-        'fill-opacity': { 
+        'fill-opacity': {
           'stops': [
             // zoom is 5 -> circle radius will be 1px
             [10, 1],
             // zoom is 10 -> circle radius will be 2px
             [12, .65]
-        ]}
+          ]
+        }
       }
-    }
-    
-    const outlineLayer = {
-      id: 'tracts-harmonized-outline',
-      type: 'line',
-      source: 'tracts-harmonized',
-      layout: {
-        visibility: 'visible'
-      },
-      paint: {
+      harmonizedOutlineLayer.paint = {
         'line-width': 2,
         'line-color': ['case', ['==', ['get', 'geoid'], geoStore.getGeoSelection(side as 'left' | 'right')], ['literal', '#000f'], '#0000']
       }
     }
-    style.layers.splice(indexOfBefore-2, 0, fillLayer)
-    style.layers.splice(indexOfBefore-1, 0, outlineLayer)
+    
   }
+  //style.layers.splice(indexOfBefore - 2, 0, harmonizedLayer)
+  //style.layers.splice(indexOfBefore - 1, 0, harmonizedOutlineLayer)
+
   //console.log('joining data', harmonizedLayer)
   side === 'left' ? leftMap?.setStyle(style) : rightMap?.setStyle(style)
 }
@@ -167,10 +166,12 @@ watch(() => props._type, (newType: string) => {
   if (_compare) _compare.switchType(newType)
 })
 
-watch(() => categoryStore.mainData, () => {
+watch(() => categoryStore.mainData, (val: any) => {
   categoryData.value = categoryStore.getDataFromCSVString()
   joinData('left')
   joinData('right')
+  assignChoroplethListeners(leftMap, 'left', emitter)
+  assignChoroplethListeners(rightMap, 'right', emitter)
 })
 
 const setupMap = (container: HTMLElement, style: any, side: 'left' | 'right') => {
@@ -181,60 +182,8 @@ const setupMap = (container: HTMLElement, style: any, side: 'left' | 'right') =>
     zoom: props._zoom,
   })
 
-  // Click handler for selecting tracts
-  map.on('click', (e: any) => {
-    if (!map) return
-    const features = map.queryRenderedFeatures(e.point, {
-      layers: ['tracts-harmonized-fill']
-    })
-    if (features.length === 0 || features[0].properties.geoid === geoStore.getGeoSelection(side)){
-      geoStore.setGeoSelection('total', side)
-      map.setPaintProperty('tracts-harmonized-outline', 'line-color', '#0000')
-      emitter.emit(`tract-${side}-hovered`, null)
-        return
-    }
-    
-    geoStore.setGeoSelection(features[0].properties.geoid, side)
-    map.setPaintProperty('tracts-harmonized-outline', 'line-color', [
-      'case', 
-      ['==', ['get', 'geoid'], features[0].properties.geoid], 
-      ['literal', selectedColorRef.value], 
-      '#0000'
-    ])
-  })
 
-  // Mouse move handler for hover effects
-  map.on('mousemove', (e: any) => {
-    if (!map) return
-    const features = map.queryRenderedFeatures(e.point, {
-      layers: ['tracts-harmonized-fill']
-    })
-    
-    if (features.length === 0) {
-      // No features under cursor, unhighlight and emit null
-      map.setPaintProperty('tracts-harmonized-fill', 'fill-outline-color', '#0000')
-      emitter.emit(`tract-${side}-hovered`, null)
-      return
-    }
-    
-    // Highlight the hovered feature
-    map.setPaintProperty('tracts-harmonized-fill', 'fill-outline-color', [
-      'case', 
-      ['==', ['get', 'geoid'], features[0].properties.geoid], 
-      ['literal', '#000f'], 
-      '#0000'
-    ])
-    
-    emitter.emit(`tract-${side}-hovered`, features[0].properties.geoid)
-  })
 
-  // Mouse leave handler
-  map.on('mouseleave', () => {
-    if (!map) return
-    // Unhighlight when mouse leaves the map
-    map.setPaintProperty('tracts-harmonized-fill', 'fill-outline-color', null)
-    emitter.emit(`tract-${side}-hovered`, null)
-  })
   document.querySelectorAll('.maplibregl-compact-show').forEach((element: any) => {
     element.classList.remove('maplibregl-compact-show')
   })
@@ -260,9 +209,11 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (leftMap) {
+    removeChoroplethListeners(leftMap, 'left', emitter)
     leftMap.remove()
   }
   if (rightMap) {
+    removeChoroplethListeners(rightMap, 'right', emitter)
     rightMap.remove()
   }
 })
