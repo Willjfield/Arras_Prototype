@@ -6,7 +6,7 @@
         :available-indicators="availableIndicators" side="left"
         @year-selected="(year: number) => handleYearSelected(year, 'left')"
         @indicator-changed="handleIndicatorChanged" />
-      <ColorLegend v-if="categoryData && availableIndicators.length > 0"
+      <ColorLegend v-if="categoryData && availableIndicators.length > 0 && categoryStore.selectedIndicators.left.geolevel === 'tract'"
         :selected-indicator="categoryStore.selectedIndicators.left" side="left" />
     </div>
     <div ref="mapContainerRight" class="map-container">
@@ -15,7 +15,7 @@
         :available-indicators="availableIndicators" side="right"
         @year-selected="(year: number) => handleYearSelected(year, 'right')"
         @indicator-changed="handleIndicatorChanged" />
-      <ColorLegend v-if="categoryData && availableIndicators.length > 0"
+      <ColorLegend v-if="categoryData && availableIndicators.length > 0 && categoryStore.selectedIndicators.right.geolevel === 'tract'"
         :selected-indicator="categoryStore.selectedIndicators.right" side="right" />
     </div>
   </div>
@@ -36,15 +36,12 @@ import { onBeforeMount } from 'vue'
 
 import {assignChoroplethListeners, removeChoroplethListeners} from '../assets/ChoroplethEvents.js'
 import {assignPointListeners, removePointListeners} from '../assets/PointLayerEvents.js'
-//import { useEmitter } from 'mitt'
 import { inject } from 'vue'
 const emitter = inject('mitt') as any
 const categoryStore = useCategoryStore()
 const geoStore = useGeoStore()
-//const selectedCategory = ref<any>(categoryStore.selectedCategory)
 const categoryData = ref<any>()
 const selectedColor = '#2563eb';
-const selectedColorRef = ref(selectedColor);
 const mapContainerLeft = ref<HTMLElement>()
 let leftMap: maplibregl.Map | null = null
 
@@ -83,20 +80,16 @@ const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
   const mainLayer = categoryStore.selectedIndicators[side].layers.main
   const _map = side === 'left' ? leftMap : rightMap
   const icons = categoryStore.selectedIndicators[side].icons
-  //if(icons && icons.length > 0) {
-   // icons.forEach((icon: any) => {
+
       _map.loadImage(icons.main.filename).then((image: any) => {
         if(!_map.hasImage(icons.main.name)) {
           _map.addImage(icons.main.name, image.data);
         }
-
+        
         _map.setLayoutProperty(mainLayer, 'icon-image', icons.main.name);
         _map.setLayoutProperty(mainLayer, 'visibility', 'visible');
-        console.log(_map.getStyle().layers.find((layer: any) => layer.id === mainLayer))
 
       })
-   // })
-  //}
 
   switch (geolevel) {
     case 'tract':
