@@ -14,10 +14,6 @@
       "type": "vector",
       "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=7SGo3nVkTl7JQ90xmJ0i\t"
     },
-    "tracts-2020": {
-      "type": "geojson",
-      "data": "/geo/ChestLanTracts2020.geojson"
-    },
     "quality-childcare-source": {
       "type": "geojson",
       "data": "/geo/Quality_Childcare.geojson"
