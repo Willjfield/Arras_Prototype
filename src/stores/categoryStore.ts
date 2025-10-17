@@ -9,7 +9,7 @@ export interface Category {
   description: string
   spreadsheetId?: string
   config?: string
-  mainData?: string
+  mainData?: any
 }
 
 export const useCategoryStore = defineStore('category', () => {
@@ -17,7 +17,7 @@ export const useCategoryStore = defineStore('category', () => {
   const categories = ref<Category[]>([])
   const selectedCategory = ref<Category | null>(null)
   const loading = ref(false)
-  const mainData = ref<string>('')
+  const mainData = ref<any>({})
   const selectedIndicators = ref<any>({
     left: null,
     right: null
@@ -56,16 +56,10 @@ export const useCategoryStore = defineStore('category', () => {
     return categories.value.find(cat => cat.query_str === queryStr)
   }
 
-  //const inactiveYears = [2022, 2021];
-  const getDataFromCSVString = () =>{
-    let headers = mainData.value.split('\n')[0].split(',').map(c => c.replace(/(\r\n|\n|\r)/gm, ""))
-    //const indicesOfInactiveYears = inactiveYears.map(year => headers.indexOf(year.toString()))
-    const rows = mainData.value.split('\n')
-    let splitRows = rows.map(r => r.split(',').map(c => c.replace(/(\r\n|\n|\r)/gm, "")).map(c => isNaN(+c) ? c : +c)).slice(1)
-   
-   // headers = headers.filter((h,i) => !indicesOfInactiveYears.includes(i))
-   // splitRows = splitRows.filter((r,i) => !indicesOfInactiveYears.includes(i))
-
+  const getDataFromCSVString = (side:any) =>{
+    let headers = mainData.value[side].split('\n')[0].split(',').map((c: string) => c.replace(/(\r\n|\n|\r)/gm, ""))
+    const rows = mainData.value[side].split('\n')
+    let splitRows = rows.map((r: string) => r.split(',').map((c: string) => c.replace(/(\r\n|\n|\r)/gm, "")).map((c: string) => isNaN(+c) ? c : +c)).slice(1)
     return { headers, rows: splitRows }
   }
 

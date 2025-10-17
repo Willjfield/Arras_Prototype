@@ -13,7 +13,7 @@ interface EventEmitter {
  * @param side - The side identifier ('left' or 'right')
  * @param emitter - Event emitter for communicating with other components
  */
-export function assignPointListeners(
+export function assignChildcareListeners(
   map: Map,
   side: 'left' | 'right',
   emitter: EventEmitter
@@ -24,7 +24,7 @@ export function assignPointListeners(
  * @param map - The MapLibre GL map instance
  * @param side - The side identifier ('left' or 'right')
  */
-export function removePointListeners(
+export function removeChildcareListeners(
   map: Map,
   side: 'left' | 'right'
 ): void;

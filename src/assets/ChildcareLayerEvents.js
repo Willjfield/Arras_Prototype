@@ -117,11 +117,11 @@ function onPointMouseLeave(map, side, e, emitter) {
 // Store function references for each map instance
 const mapListeners = new Map()
 
-function assignPointListeners(map, side, emitter) {
+function assignChildcareListeners(map, side, emitter) {
     if (!map) return
 
     // Remove existing listeners first to prevent duplicates
-    removePointListeners(map, side)
+    removeChildcareListeners(map, side)
 
     // Create function references
     const clickHandler = (e) => onPointClick(map, side, e, emitter)
@@ -142,7 +142,7 @@ function assignPointListeners(map, side, emitter) {
     map.on('mouseleave', mouseleaveHandler)
 }
 
-function removePointListeners(map, side) {
+function removeChildcareListeners(map, side) {
     if (!map) return
 
     const mapKey = `${side}-${map._container?.id || 'default'}`
@@ -156,4 +156,4 @@ function removePointListeners(map, side) {
     }
 }
 
-export { assignPointListeners, removePointListeners }
+export { assignChildcareListeners, removeChildcareListeners }

@@ -46,10 +46,13 @@ onBeforeMount(async () => {
             right: categoryConfig.indicators[1]
         })
         // Use the corrected Google Sheets URL format
-        const googleSheetsUrl = categoryConfig.google_sheets_url;
-        const data = await axios.get(googleSheetsUrl);
-        categoryStore.mainData = data.data;
-
+        const leftIndicatorData = await axios.get(categoryConfig.indicators[0].google_sheets_url);
+        const rightIndicatorData = await axios.get(categoryConfig.indicators[1].google_sheets_url);
+        categoryStore.mainData = {
+            left: leftIndicatorData.data,
+            right: rightIndicatorData.data
+        }
+        
     } catch (error) {
         console.error('Error loading data:', error);
     }

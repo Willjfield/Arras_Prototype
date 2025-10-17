@@ -1,11 +1,10 @@
 {   
-    "spreadsheetId":"1FdR-8pMy_3TdAyaDECaIzL0K7ASoBo49",
-    "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
     "indicators": [
         {
             "title": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
             "field": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
             "geolevel":"tract",
+            "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
             "layers":{
                 "main":"tracts-harmonized-fill",
                 "outline":"tracts-harmonized-outline"
@@ -26,6 +25,7 @@
             "title": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
             "field": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
             "geolevel":"tract",
+            "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
             "layers":{
                 "main":"tracts-harmonized-fill",
                 "outline":"tracts-harmonized-outline"
@@ -46,6 +46,7 @@
             "title": "Percent of 3 and 4 Year Olds enrolled in Pre-K",
             "field": "Percent of 3 and 4 Year Olds enrolled in Pre-K",
             "geolevel":"tract",
+            "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
             "layers":{
                 "main":"tracts-harmonized-fill",
                 "outline":"tracts-harmonized-outline"
@@ -65,7 +66,8 @@
         {
             "title":"Availability of quality childcare",
             "field":"Availability of quality childcare",
-            "geolevel":"point",
+            "geolevel":"childcare",
+            "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
             "layers":{
                 "main":"quality-childcare"
             },

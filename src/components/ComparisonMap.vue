@@ -1,21 +1,23 @@
 <template>
   <div id="comparison-container">
     <div ref="mapContainerLeft" class="map-container">
-      <TimelineVisualization v-if="categoryData && availableIndicators.length > 0" :category-data="categoryData"
+      <TimelineVisualization v-if="categoryData && availableIndicators.length > 0" :category-data="categoryData.left"
         :selected-indicator="categoryStore.selectedIndicators.left" :selected-year="categoryStore.selectedYear.left"
         :available-indicators="availableIndicators" side="left"
         @year-selected="(year: number) => handleYearSelected(year, 'left')"
         @indicator-changed="handleIndicatorChanged" />
-      <ColorLegend v-if="categoryData && availableIndicators.length > 0 && categoryStore.selectedIndicators.left.geolevel === 'tract'"
+      <ColorLegend
+        v-if="categoryData && availableIndicators.length > 0 && categoryStore.selectedIndicators.left.geolevel === 'tract'"
         :selected-indicator="categoryStore.selectedIndicators.left" side="left" />
     </div>
     <div ref="mapContainerRight" class="map-container">
-      <TimelineVisualization v-if="categoryData && availableIndicators.length > 0" :category-data="categoryData"
+      <TimelineVisualization v-if="categoryData && availableIndicators.length > 0" :category-data="categoryData.right"
         :selected-indicator="categoryStore.selectedIndicators.right" :selected-year="categoryStore.selectedYear.right"
         :available-indicators="availableIndicators" side="right"
         @year-selected="(year: number) => handleYearSelected(year, 'right')"
         @indicator-changed="handleIndicatorChanged" />
-      <ColorLegend v-if="categoryData && availableIndicators.length > 0 && categoryStore.selectedIndicators.right.geolevel === 'tract'"
+      <ColorLegend
+        v-if="categoryData && availableIndicators.length > 0 && categoryStore.selectedIndicators.right.geolevel === 'tract'"
         :selected-indicator="categoryStore.selectedIndicators.right" side="right" />
     </div>
   </div>
@@ -34,13 +36,13 @@ import TimelineVisualization from './TimelineVisualization.vue'
 import ColorLegend from './ColorLegend.vue'
 import { onBeforeMount } from 'vue'
 
-import {assignChoroplethListeners, removeChoroplethListeners} from '../assets/ChoroplethEvents.js'
-import {assignPointListeners, removePointListeners} from '../assets/PointLayerEvents.js'
+import { assignChoroplethListeners, removeChoroplethListeners } from '../assets/ChoroplethEvents.js'
+import { assignChildcareListeners, removeChildcareListeners } from '../assets/ChildcareLayerEvents.js'
 import { inject } from 'vue'
 const emitter = inject('mitt') as any
 const categoryStore = useCategoryStore()
 const geoStore = useGeoStore()
-const categoryData = ref<any>()
+const categoryData = ref<any>({left: null, right: null})
 const selectedColor = '#2563eb';
 const mapContainerLeft = ref<HTMLElement>()
 let leftMap: maplibregl.Map | null = null
@@ -76,36 +78,23 @@ const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
     [side]: indicator
   })
   joinData(side as 'left' | 'right')
-  const geolevel:string = categoryStore.selectedIndicators[side].geolevel
-  const mainLayer:string = categoryStore.selectedIndicators[side].layers.main
-  if(!side || !mainLayer) return;
-  const _map:maplibregl.Map | null = side === 'left' ? leftMap : rightMap
-  if(!_map) return;
-  const icons:any = categoryStore.selectedIndicators[side].icons
-  if(icons){
-    
-      _map.loadImage(icons.main.filename).then((image: any) => {
-        if(!_map.hasImage(icons.main.name)) {
-          _map.addImage(icons.main.name, image.data, {sdf: true});
-        }
-        
-        _map.setLayoutProperty(mainLayer, 'icon-image', icons.main.name);
-        _map.setLayoutProperty(mainLayer, 'visibility', 'visible');
+  const mainLayer: string = categoryStore.selectedIndicators[side].layers.main
+  if (!side || !mainLayer) return;
+  const _map: maplibregl.Map | null = side === 'left' ? leftMap : rightMap
+  if (!_map) return;
+  const icons: any = categoryStore.selectedIndicators[side].icons
+  if (icons) {
 
-      })
+    _map.loadImage(icons.main.filename).then((image: any) => {
+      if (!_map.hasImage(icons.main.name)) {
+        _map.addImage(icons.main.name, image.data, { sdf: true });
+      }
+
+      _map.setLayoutProperty(mainLayer, 'icon-image', icons.main.name);
+      _map.setLayoutProperty(mainLayer, 'visibility', 'visible');
+
+    })
   }
-
-  switch (geolevel) {
-    case 'tract':
-      removePointListeners(_map as any, side as 'left' | 'right')
-      assignChoroplethListeners(_map as any, side as 'left' | 'right', emitter)
-      break
-    case 'point':
-      removeChoroplethListeners(_map as any, side as 'left' | 'right')
-      assignPointListeners(_map as any, side as 'left' | 'right', emitter)
-      break
-  }
-
 }
 
 const availableIndicators = computed(() => {
@@ -115,28 +104,21 @@ const availableIndicators = computed(() => {
   // For now, return empty array - it will be updated via the store
   return categoryStore.availableIndicators || []
 })
-
-const joinData = async (side: string) => {
+const joinTractData = async (side: 'left' | 'right') => {
   const style = side === 'left' ? leftStyle : rightStyle
   const _map = side === 'left' ? leftMap : rightMap
   const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
   const harmonizedOutlineLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-outline')
   const qualityChildcareLayer = style.layers.find((layer: any) => layer.id === 'quality-childcare')
-  if (categoryStore.selectedIndicators[side as 'left' | 'right'].geolevel !== 'tract') {
-    harmonizedLayer.layout.visibility = 'none'
-    harmonizedOutlineLayer.layout.visibility = 'none'
-   if(categoryStore.selectedIndicators[side as 'left' | 'right'].geolevel === 'point') {
-     qualityChildcareLayer.layout.visibility = 'visible'
-   }
-   removeChoroplethListeners(_map as any, side as 'left' | 'right')
-  } else if(harmonizedLayer && harmonizedOutlineLayer && qualityChildcareLayer){
+  const _indicator: any = categoryStore.selectedIndicators[side as 'left' | 'right']
+  if (harmonizedLayer && harmonizedOutlineLayer && qualityChildcareLayer) {
     harmonizedLayer.layout.visibility = 'visible'
     harmonizedOutlineLayer.layout.visibility = 'visible'
     qualityChildcareLayer.layout.visibility = 'none'
     geojson.features.forEach((f: any) => {
-      const row = categoryData.value.rows.find((r: any) => r[0] === +f.properties.geoid)
+      const row = categoryData.value[side].rows.find((r: any) => r[0] === +f.properties.geoid)
       if (row && row.length > 0) {
-        const headers = categoryData.value.headers
+        const headers = categoryData.value[side].headers
         const rowObject = row.reduce((acc: any, curr: any, index: number) => {
           acc[headers[index]] = curr
           return acc
@@ -150,13 +132,12 @@ const joinData = async (side: string) => {
     style.sources['tracts-harmonized'] = { type: 'geojson' }
 
     style.sources['tracts-harmonized'].data = geojson;
-    const layerFillStyle = categoryStore.selectedIndicators[side].style;
-    let _fillColor: any[] = toRaw(categoryStore.selectedIndicators[side].fill_color)
+    const layerFillStyle = _indicator.style;
+    let _fillColor: any[] = toRaw(_indicator.fill_color)
 
     _fillColor = [..._fillColor, layerFillStyle.min.value, layerFillStyle.min.color, layerFillStyle.max.value, layerFillStyle.max.color]
 
-    //THIS WORKS FOR GRADIENTS BUT NOT ALL EXPRESSIONS!
-    _fillColor[2][1][1] = '' + categoryStore.selectedYear[side]
+    _fillColor[2][1][1] = '' + categoryStore.selectedYear[side as 'left' | 'right']
 
     if (harmonizedLayer) {
       harmonizedLayer.paint['fill-color'] = _fillColor
@@ -179,46 +160,63 @@ const joinData = async (side: string) => {
         'line-color': ['case', ['==', ['get', 'geoid'], geoStore.getGeoSelection(side as 'left' | 'right')], ['literal', '#000f'], '#0000']
       }
     }
-    
-  }
-  if(_map) _map.setStyle(style)
-}
 
+  }
+  assignChoroplethListeners(_map as any, side, emitter)
+}
+const joinChildcareData = async (side: 'left' | 'right') => {
+  const style = side === 'left' ? leftStyle : rightStyle
+  const _map = side === 'left' ? leftMap : rightMap
+  const qualityChildcareLayer = style.layers.find((layer: any) => layer.id === 'quality-childcare')
+  const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
+  const harmonizedOutlineLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-outline')
+  if (qualityChildcareLayer) {
+    qualityChildcareLayer.layout.visibility = 'visible'
+  }
+  if (harmonizedLayer) {
+    harmonizedLayer.layout.visibility = 'none'
+    harmonizedOutlineLayer.layout.visibility = 'none'
+  }
+  assignChildcareListeners(_map as any, side, emitter)
+}
+const joinData = async (side: string) => {
+  const _map = side === 'left' ? leftMap : rightMap
+  const style = side === 'left' ? leftStyle : rightStyle
+  removeChoroplethListeners(_map as any, side)
+  removeChildcareListeners(_map as any, side)
+  const geolevel = categoryStore.selectedIndicators[side as 'left' | 'right'].geolevel
+  switch(geolevel) {
+    case 'tract':
+      joinTractData(side as 'left' | 'right')
+      break
+    case 'childcare':
+      joinChildcareData(side as 'left' | 'right')
+      break
+  }
+  if (_map) _map.setStyle(style)
+}
 let _compare: Compare | null = null
 // Watch for changes in props._type and execute function based on value
 watch(() => props._type, (newType: string) => {
   if (_compare) _compare.switchType(newType)
 })
 
-watch(() => categoryStore.mainData, () => {
-  categoryData.value = categoryStore.getDataFromCSVString()
+watch(() => categoryStore.mainData.left, () => {
+  categoryData.value.left = categoryStore.getDataFromCSVString('left')
   joinData('left')
+})
+watch(() => categoryStore.mainData.right, () => {
+  categoryData.value.right = categoryStore.getDataFromCSVString('right')
   joinData('right')
-  if(categoryStore.selectedIndicators.left.geolevel === 'tract' && leftMap) {
-    removePointListeners(leftMap as any, 'left')
-    assignChoroplethListeners(leftMap as any, 'left', emitter)
-  } else if(leftMap) {
-    removeChoroplethListeners(leftMap as any, 'left')
-    assignPointListeners(leftMap as any, 'left', emitter)
-  }
-  if(categoryStore.selectedIndicators.right.geolevel === 'tract' && rightMap) {
-    removePointListeners(rightMap as any, 'right')
-    assignChoroplethListeners(rightMap as any, 'right', emitter)
-  } else if(rightMap) {
-    removeChoroplethListeners(rightMap as any, 'right')
-    assignPointListeners(rightMap as any, 'right', emitter)
-  }
 })
 
 const setupMap = (container: HTMLElement, style: any) => {
-  const map:maplibregl.Map = new maplibregl.Map({
+  const map: maplibregl.Map = new maplibregl.Map({
     container: container,
     style: style,
     center: props._center,
     zoom: props._zoom,
   })
-
-
 
   document.querySelectorAll('.maplibregl-compact-show').forEach((element: any) => {
     element.classList.remove('maplibregl-compact-show')
@@ -286,15 +284,18 @@ onUnmounted(() => {
   line-height: 1.25em;
   background-color: transparent;
 }
+
 .popup-content td {
   padding: 0 5px;
   vertical-align: top;
   border-bottom: 1px solid #ccc;
 }
-.popup-content table{
+
+.popup-content table {
   border-top: 1px solid #000;
   background-color: transparent;
 }
+
 /* .popup-content td:last-child {
   border-bottom: none;
 } */
@@ -305,10 +306,8 @@ onUnmounted(() => {
   background-color: transparent;
 }
 
-.maplibregl-popup-content{
+.maplibregl-popup-content {
   background-color: #fffd;
   pointer-events: none;
 }
-
-
 </style>
