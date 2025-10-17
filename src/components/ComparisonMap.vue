@@ -75,12 +75,15 @@ const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
     ...categoryStore.selectedIndicators,
     [side]: indicator
   })
-  joinData(side)
-  const geolevel = categoryStore.selectedIndicators[side].geolevel
-  const mainLayer = categoryStore.selectedIndicators[side].layers.main
-  const _map = side === 'left' ? leftMap : rightMap
-  const icons = categoryStore.selectedIndicators[side].icons
-
+  joinData(side as 'left' | 'right')
+  const geolevel:string = categoryStore.selectedIndicators[side].geolevel
+  const mainLayer:string = categoryStore.selectedIndicators[side].layers.main
+  if(!side || !mainLayer) return;
+  const _map:maplibregl.Map | null = side === 'left' ? leftMap : rightMap
+  if(!_map) return;
+  const icons:any = categoryStore.selectedIndicators[side].icons
+  if(icons){
+    
       _map.loadImage(icons.main.filename).then((image: any) => {
         if(!_map.hasImage(icons.main.name)) {
           _map.addImage(icons.main.name, image.data, {sdf: true});
@@ -90,15 +93,16 @@ const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
         _map.setLayoutProperty(mainLayer, 'visibility', 'visible');
 
       })
+  }
 
   switch (geolevel) {
     case 'tract':
-      removePointListeners(_map, side)
-      assignChoroplethListeners(_map, side, emitter)
+      removePointListeners(_map as any, side as 'left' | 'right')
+      assignChoroplethListeners(_map as any, side as 'left' | 'right', emitter)
       break
     case 'point':
-      removeChoroplethListeners(_map, side)
-      assignPointListeners(_map, side, emitter)
+      removeChoroplethListeners(_map as any, side as 'left' | 'right')
+      assignPointListeners(_map as any, side as 'left' | 'right', emitter)
       break
   }
 
@@ -118,14 +122,14 @@ const joinData = async (side: string) => {
   const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
   const harmonizedOutlineLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-outline')
   const qualityChildcareLayer = style.layers.find((layer: any) => layer.id === 'quality-childcare')
-  if (categoryStore.selectedIndicators[side].geolevel !== 'tract') {
+  if (categoryStore.selectedIndicators[side as 'left' | 'right'].geolevel !== 'tract') {
     harmonizedLayer.layout.visibility = 'none'
     harmonizedOutlineLayer.layout.visibility = 'none'
-   if(categoryStore.selectedIndicators[side].geolevel === 'point') {
+   if(categoryStore.selectedIndicators[side as 'left' | 'right'].geolevel === 'point') {
      qualityChildcareLayer.layout.visibility = 'visible'
    }
-   removeChoroplethListeners(_map as any, side)
-  } else {
+   removeChoroplethListeners(_map as any, side as 'left' | 'right')
+  } else if(harmonizedLayer && harmonizedOutlineLayer && qualityChildcareLayer){
     harmonizedLayer.layout.visibility = 'visible'
     harmonizedOutlineLayer.layout.visibility = 'visible'
     qualityChildcareLayer.layout.visibility = 'none'
@@ -177,7 +181,7 @@ const joinData = async (side: string) => {
     }
     
   }
-  _map.setStyle(style)
+  if(_map) _map.setStyle(style)
 }
 
 let _compare: Compare | null = null
@@ -186,28 +190,28 @@ watch(() => props._type, (newType: string) => {
   if (_compare) _compare.switchType(newType)
 })
 
-watch(() => categoryStore.mainData, (val: any) => {
+watch(() => categoryStore.mainData, () => {
   categoryData.value = categoryStore.getDataFromCSVString()
   joinData('left')
   joinData('right')
-  if(categoryStore.selectedIndicators.left.geolevel === 'tract') {
+  if(categoryStore.selectedIndicators.left.geolevel === 'tract' && leftMap) {
     removePointListeners(leftMap as any, 'left')
     assignChoroplethListeners(leftMap as any, 'left', emitter)
-  } else {
+  } else if(leftMap) {
     removeChoroplethListeners(leftMap as any, 'left')
     assignPointListeners(leftMap as any, 'left', emitter)
   }
-  if(categoryStore.selectedIndicators.right.geolevel === 'tract') {
+  if(categoryStore.selectedIndicators.right.geolevel === 'tract' && rightMap) {
     removePointListeners(rightMap as any, 'right')
     assignChoroplethListeners(rightMap as any, 'right', emitter)
-  } else {
+  } else if(rightMap) {
     removeChoroplethListeners(rightMap as any, 'right')
     assignPointListeners(rightMap as any, 'right', emitter)
   }
 })
 
-const setupMap = (container: HTMLElement, style: any, side: 'left' | 'right') => {
-  const map = new maplibregl.Map({
+const setupMap = (container: HTMLElement, style: any) => {
+  const map:maplibregl.Map = new maplibregl.Map({
     container: container,
     style: style,
     center: props._center,
@@ -225,12 +229,12 @@ const setupMap = (container: HTMLElement, style: any, side: 'left' | 'right') =>
 onMounted(() => {
   // Setup left map
   if (mapContainerLeft.value) {
-    leftMap = setupMap(mapContainerLeft.value, leftStyle, 'left')
+    leftMap = setupMap(mapContainerLeft.value, leftStyle)
   }
 
   // Setup right map
   if (mapContainerRight.value) {
-    rightMap = setupMap(mapContainerRight.value, rightStyle, 'right')
+    rightMap = setupMap(mapContainerRight.value, rightStyle)
   }
 
   // Initialize comparison when both maps are ready

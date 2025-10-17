@@ -1,0 +1,30 @@
+import { Map } from 'maplibre-gl';
+
+/**
+ * Event emitter interface for map events
+ */
+interface EventEmitter {
+  emit(event: string, data: any): void;
+}
+
+/**
+ * Assigns choropleth event listeners to a map instance
+ * @param map - The MapLibre GL map instance
+ * @param side - The side identifier ('left' or 'right')
+ * @param emitter - Event emitter for communicating with other components
+ */
+export function assignChoroplethListeners(
+  map: Map,
+  side: 'left' | 'right',
+  emitter: EventEmitter
+): void;
+
+/**
+ * Removes choropleth event listeners from a map instance
+ * @param map - The MapLibre GL map instance
+ * @param side - The side identifier ('left' or 'right')
+ */
+export function removeChoroplethListeners(
+  map: Map,
+  side: 'left' | 'right'
+): void;
