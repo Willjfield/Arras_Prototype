@@ -83,7 +83,7 @@ const handleIndicatorChanged = (indicator: any, side: 'left' | 'right') => {
 
       _map.loadImage(icons.main.filename).then((image: any) => {
         if(!_map.hasImage(icons.main.name)) {
-          _map.addImage(icons.main.name, image.data);
+          _map.addImage(icons.main.name, image.data, {sdf: true});
         }
         
         _map.setLayoutProperty(mainLayer, 'icon-image', icons.main.name);
@@ -276,4 +276,35 @@ onUnmounted(() => {
   bottom: 0;
   right: 0;
 }
+
+.popup-content {
+  text-align: left;
+  line-height: 1.25em;
+  background-color: transparent;
+}
+.popup-content td {
+  padding: 0 5px;
+  vertical-align: top;
+  border-bottom: 1px solid #ccc;
+}
+.popup-content table{
+  border-top: 1px solid #000;
+  background-color: transparent;
+}
+/* .popup-content td:last-child {
+  border-bottom: none;
+} */
+.maplibregl-popup {
+  max-width: 500px !important;
+  z-index: 2;
+  pointer-events: none;
+  background-color: transparent;
+}
+
+.maplibregl-popup-content{
+  background-color: #fffd;
+  pointer-events: none;
+}
+
+
 </style>

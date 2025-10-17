@@ -47,13 +47,47 @@ function onPointmousemove(map, side, e, emitter) {
         closeButton: false,
         closeOnClick: false
     });
+    let dateField = features[0].properties.Last_ABC_Inspection_Date;
+    if(dateField){
+        dateField = new Date(dateField).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
     popup.setLngLat(features[0].geometry.coordinates).setHTML(
-        `<h3> 
-        ${features[0].properties.Provider_Name} </h3>
+        `<div class="popup-content">
+        <div class="blur-background"></div>
+        <h3>${features[0].properties.Provider_Name} </h3>
         <p>Operator: ${features[0].properties.Operator}<br/>
+        Provider: ${features[0].properties.Provider_Name}<br/>
         ${features[0].properties.Street_Address}<br/>
-        ${features[0].properties.City}, ${features[0].properties.State} ${features[0].properties.Zip_Code}
-        </p>`).addTo(map);
+        ${features[0].properties.City}, ${features[0].properties.State} ${features[0].properties.Zip_Code}<br>
+        ${features[0].properties.Phone_Number}
+        </p>
+        <table>
+            <tr>
+                <td>Capacity</td>
+                <td>${features[0].properties.Capacity}</td>
+            </tr>
+            <tr style="display: ${features[0].properties.ABC_Level ? 'table-row' : 'none'}">
+                <td>ABC Level</td>
+                <td>${features[0].properties.ABC_Level}<br/>(Last Inspection:<br/>${dateField})</td>
+            </tr>
+            <tr style="display: ${features[0].properties.Breastfeeding_Friendly ? 'table-row' : 'none'}">
+                <td>Breastfeeding Friendly</td>
+                <td>${features[0].properties.Breastfeeding_Friendly === 'FALSE' ? 'No' : 'Yes'}</td>
+            </tr>
+            <tr style="display: ${features[0].properties.Early_Head_Start ? 'table-row' : 'none'}">
+                <td>Early Head Start</td>
+                <td>${features[0].properties.Head_Start === 'FALSE' ? 'No' : 'Yes'}</td>
+            </tr>
+            <tr style="display: ${features[0].properties.Head_Start ? 'table-row' : 'none'}">
+                <td>Head Start</td>
+                <td>${features[0].properties.Head_Start === 'FALSE' ? 'No' : 'Yes'}</td>
+            </tr>
+            <tr style="display: ${features[0].properties.First_Steps ? 'table-row' : 'none'}">
+                <td>First Steps</td>
+                <td>${features[0].properties.First_Steps === 'FALSE' ? 'No' : 'Yes'}</td>
+            </tr>
+            </table>
+        </div>`).addTo(map);
 
     // Highlight the hovered feature
     const numGeoSelection = geoStore.getGeoSelection(side) === 'total' ? -1 : parseInt(geoStore.getGeoSelection(side))
@@ -61,16 +95,16 @@ function onPointmousemove(map, side, e, emitter) {
         'case',
         ['==', ['to-number', ['get', 'geoid']], ['to-number', features[0].properties.geoid]],
         1,
-        ['==', ['to-number', ['get', 'geoid']], numGeoSelection],
-        1,
+        // ['==', ['to-number', ['get', 'geoid']], numGeoSelection],
+        // 1,
         0.75
     ])
     map.setPaintProperty(categoryStore.selectedIndicators[side].layers.main, 'icon-color', [
         'case',
         ['==', ['to-number', ['get', 'geoid']], ['to-number', features[0].properties.geoid]],
         ['literal', selectedColor],
-        ['==', ['to-number', ['get', 'geoid']], numGeoSelection],
-        ['literal', selectedColor],
+        // ['==', ['to-number', ['get', 'geoid']], numGeoSelection],
+        // ['literal', selectedColor],
         ['literal', '#888']
     ])
     //emitter.emit(`tract-${side}-hovered`, +features[0].properties.geoid)
