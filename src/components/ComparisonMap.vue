@@ -1,23 +1,23 @@
 <template>
   <div id="comparison-container">
     <div ref="mapContainerLeft" class="map-container">
-      <TimelineVisualization v-if="categoryData && availableIndicators.length > 0" :category-data="categoryData.left"
+      <TimelineVisualization v-if="indicatorData && availableIndicators.length > 0" :category-data="indicatorData.left"
         :selected-indicator="categoryStore.selectedIndicators.left" :selected-year="categoryStore.selectedYear.left"
         :available-indicators="availableIndicators" side="left"
         @year-selected="(year: number) => handleYearSelected(year, 'left')"
         @indicator-changed="handleIndicatorChanged" />
       <ColorLegend
-        v-if="categoryData && availableIndicators.length > 0 && categoryStore.selectedIndicators.left.geolevel === 'tract'"
+        v-if="indicatorData && availableIndicators.length > 0 && categoryStore.selectedIndicators.left.geolevel === 'tract'"
         :selected-indicator="categoryStore.selectedIndicators.left" side="left" />
     </div>
     <div ref="mapContainerRight" class="map-container">
-      <TimelineVisualization v-if="categoryData && availableIndicators.length > 0" :category-data="categoryData.right"
+      <TimelineVisualization v-if="indicatorData && availableIndicators.length > 0" :category-data="indicatorData.right"
         :selected-indicator="categoryStore.selectedIndicators.right" :selected-year="categoryStore.selectedYear.right"
         :available-indicators="availableIndicators" side="right"
         @year-selected="(year: number) => handleYearSelected(year, 'right')"
         @indicator-changed="handleIndicatorChanged" />
       <ColorLegend
-        v-if="categoryData && availableIndicators.length > 0 && categoryStore.selectedIndicators.right.geolevel === 'tract'"
+        v-if="indicatorData && availableIndicators.length > 0 && categoryStore.selectedIndicators.right.geolevel === 'tract'"
         :selected-indicator="categoryStore.selectedIndicators.right" side="right" />
     </div>
   </div>
@@ -37,12 +37,12 @@ import ColorLegend from './ColorLegend.vue'
 import { onBeforeMount } from 'vue'
 
 import { assignChoroplethListeners, removeChoroplethListeners } from '../assets/ChoroplethEvents.js'
-import { assignChildcareListeners, removeChildcareListeners } from '../assets/ChildcareLayerEvents.js'
+import { assignChildcareListeners, removeChildcareListeners, onIndicatorSelected } from '../assets/ChildcareLayerEvents.js'
 import { inject } from 'vue'
 const emitter = inject('mitt') as any
 const categoryStore = useCategoryStore()
 const geoStore = useGeoStore()
-const categoryData = ref<any>({left: null, right: null})
+const indicatorData = ref<any>({left: null, right: null})
 const selectedColor = '#2563eb';
 const mapContainerLeft = ref<HTMLElement>()
 let leftMap: maplibregl.Map | null = null
@@ -116,9 +116,9 @@ const joinTractData = async (side: 'left' | 'right') => {
     harmonizedOutlineLayer.layout.visibility = 'visible'
     qualityChildcareLayer.layout.visibility = 'none'
     geojson.features.forEach((f: any) => {
-      const row = categoryData.value[side].rows.find((r: any) => r[0] === +f.properties.geoid)
+      const row = indicatorData.value[side].rows.find((r: any) => r[0] === +f.properties.geoid)
       if (row && row.length > 0) {
-        const headers = categoryData.value[side].headers
+        const headers = indicatorData.value[side].headers
         const rowObject = row.reduce((acc: any, curr: any, index: number) => {
           acc[headers[index]] = curr
           return acc
@@ -170,6 +170,10 @@ const joinChildcareData = async (side: 'left' | 'right') => {
   const qualityChildcareLayer = style.layers.find((layer: any) => layer.id === 'quality-childcare')
   const harmonizedLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-fill')
   const harmonizedOutlineLayer = style.layers.find((layer: any) => layer.id === 'tracts-harmonized-outline')
+  const quaityChildcareSource = style.sources.find((source: any) => source.id === 'quality-childcare')
+
+  //TODO: CHECK IF THIS WORKS. Don't do this exact thing for tracts because it' using the same geometry joined to lots of variables
+  quaityChildcareSource.data = onIndicatorSelected(indicatorData.value[side])
   if (qualityChildcareLayer) {
     qualityChildcareLayer.layout.visibility = 'visible'
   }
@@ -202,11 +206,11 @@ watch(() => props._type, (newType: string) => {
 })
 
 watch(() => categoryStore.mainData.left, () => {
-  categoryData.value.left = categoryStore.getDataFromCSVString('left')
+  indicatorData.value.left = categoryStore.getDataFromCSVString('left')
   joinData('left')
 })
 watch(() => categoryStore.mainData.right, () => {
-  categoryData.value.right = categoryStore.getDataFromCSVString('right')
+  indicatorData.value.right = categoryStore.getDataFromCSVString('right')
   joinData('right')
 })
 

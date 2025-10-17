@@ -1,11 +1,31 @@
 import { useCategoryStore } from '../stores/categoryStore'
 import { useGeoStore } from '../stores/geoStore'
 import maplibregl from 'maplibre-gl'
+import axios from 'axios'
 const categoryStore = useCategoryStore()
 const geoStore = useGeoStore()
 const selectedColor = '#2563eb';
 let popup = null
 
+function onIndicatorSelected(data){
+    const rows = data.rows
+    const headers = data.headers
+    return ({
+        type: 'FeatureCollection',
+        features: rows.map((row: any) => ({
+            type: 'Feature',
+            geometry: {
+                type: 'Point',
+                coordinates: [row[1], row[2]]
+            },
+            properties: {
+                headers.map((header: any, index: number) => ({
+                    [header]: row[index]
+                }))
+            }
+        }))
+    })
+}
 function onPointClick(map, side, e, emitter) {
 
     if (!map) return
@@ -156,4 +176,4 @@ function removeChildcareListeners(map, side) {
     }
 }
 
-export { assignChildcareListeners, removeChildcareListeners }
+export { assignChildcareListeners, removeChildcareListeners, onIndicatorSelected }

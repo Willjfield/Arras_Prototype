@@ -7,6 +7,8 @@ interface EventEmitter {
   emit(event: string, data: any): void;
 }
 
+export function onIndicatorSelected(side: 'left' | 'right' | string): void;
+
 /**
  * Assigns point layer event listeners to a map instance
  * @param map - The MapLibre GL map instance

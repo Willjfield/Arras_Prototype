@@ -24,7 +24,7 @@ import { useGeoStore } from '../stores/geoStore'
 const geoStore = useGeoStore()
 const emitter = inject('mitt') as any
 interface Props {
-  categoryData: any
+  indicatorData: any
   selectedIndicator: any
   selectedYear: number
   side: 'left' | 'right'
@@ -56,10 +56,10 @@ let height = 100
 let margin = { top: 0, right: 5, bottom: 5, left: 20 }
 
 const processData = (_tract: string | number | null) => {
-  if (!props.categoryData || !props.selectedIndicator) return []
+  if (!props.indicatorData || !props.selectedIndicator) return []
 
-  const headers = props.categoryData.headers
-  const rows = props.categoryData.rows
+  const headers = props.indicatorData.headers
+  const rows = props.indicatorData.rows
 
   // Find year columns (numeric strings)
   const yearColumns = headers.filter((header: string) =>
@@ -361,7 +361,7 @@ const handleIndicatorChange = (indicator: any) => {
 }
 
 // Watch for data changes
-watch([() => props.categoryData, () => props.selectedIndicator, () => props.selectedYear, () => geoStore.geoSelection],
+watch([() => props.indicatorData, () => props.selectedIndicator, () => props.selectedYear, () => geoStore.geoSelection],
   () => {
     nextTick(() => {
       createChart()
