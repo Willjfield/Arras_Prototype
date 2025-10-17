@@ -15,7 +15,7 @@ interface EventEmitter {
  */
 export function assignChoroplethListeners(
   map: Map,
-  side: 'left' | 'right',
+  side: 'left' | 'right' | string,
   emitter: EventEmitter
 ): void;
 
@@ -26,5 +26,5 @@ export function assignChoroplethListeners(
  */
 export function removeChoroplethListeners(
   map: Map,
-  side: 'left' | 'right'
+  side: 'left' | 'right' | string
 ): void;
