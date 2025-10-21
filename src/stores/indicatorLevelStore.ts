@@ -2,6 +2,13 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { IndicatorConfig } from '../types/IndicatorConfig.ts'
 import { useThemeLevelStore } from './themeLevelStore'
+import { createDataToMapWorker } from '../utils/dataToMapWorkerFactory.ts'
+import type { DataToMap } from '../utils/dataToMap.ts'
+export interface IndicatorLevelStore {
+    currentIndicator: IndicatorConfig | null
+    currentIndicatorData: any
+    currentIndicatorDataToMap: DataToMap | null
+}
 
 const themeLevelStore = useThemeLevelStore()
 
@@ -9,7 +16,8 @@ const indicatorLevelStore = (storeName: 'left' | 'right') => {
 
     const currentThemeIndicators = themeLevelStore.getAllCurrentThemeIndicators()
     const currentIndicator = ref<IndicatorConfig | null>(null)
-
+    const currentIndicatorDataToMapWorker = ref<DataToMap | null>(null)
+    
     // Set the default indicator for the side
     const defaultForSide = currentThemeIndicators?.find((i: IndicatorConfig) => storeName.includes(i.default as string)) || null
     currentIndicator.value = defaultForSide
@@ -21,6 +29,7 @@ const indicatorLevelStore = (storeName: 'left' | 'right') => {
         } else {
             currentIndicator.value = null
         }
+        currentIndicatorDataToMapWorker.value = createDataToMapWorker(indicator)
     }
 
     function getCurrentIndicator() : IndicatorConfig | null {
