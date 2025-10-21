@@ -12,6 +12,8 @@ export interface Category {
   mainData?: any
 }
 
+
+
 export const useCategoryStore = defineStore('category', () => {
   // State
   const categories = ref<Category[]>([])
@@ -56,11 +58,22 @@ export const useCategoryStore = defineStore('category', () => {
     return categories.value.find(cat => cat.query_str === queryStr)
   }
 
-  const getDataFromCSVString = (side:any) =>{
-    let headers = mainData.value[side].split('\n')[0].split(',').map((c: string) => c.replace(/(\r\n|\n|\r)/gm, ""))
-    const rows = mainData.value[side].split('\n')
+  const getDataFromCSVString = (csvString: string) =>{
+    const newLineDelimited = csvString.split('\n')
+    let headers = newLineDelimited[0].split(',').map((c: string) => c.replace(/(\r\n|\n|\r)/gm, ""))
+    let headerDisplayNames = newLineDelimited[1].split(',').map((c: string) => c.replace(/(\r\n|\n|\r)/gm, ""))
+    const rows = newLineDelimited.slice(2)
+
     let splitRows = rows.map((r: string) => r.split(',').map((c: string) => c.replace(/(\r\n|\n|\r)/gm, "")).map((c: string) => isNaN(+c) ? c : +c)).slice(1)
-    return { headers, rows: splitRows }
+    return { headers, headerDisplayNames, rows: splitRows }
+  }
+
+  const requestDataForIndicatorFromGoogleSheets = async (indicator: any, side: 'left' | 'right') => {
+    const response = await axios.get(indicator.google_sheets_url)
+    const data = getDataFromCSVString(response.data)
+    
+    mainData.value[side as 'left' | 'right'] = data
+    return data
   }
 
   const setSelectedYear = (year: number, side: string) => {
@@ -88,16 +101,17 @@ export const useCategoryStore = defineStore('category', () => {
     selectedYear,
     selectedIndicators,
     availableIndicators,
+    mainData,
     // Actions
     loadCategories,
     selectCategoryByQueryStr,
-    getCategoryByQueryStr,
-    mainData,
-    getDataFromCSVString,
+    requestDataForIndicatorFromGoogleSheets,
     setSelectedYear,
     setSelectedIndicators,
     setAvailableIndicators,
     // Getters
-    enabledCategories
+    enabledCategories,
+    getDataFromCSVString,
+    getCategoryByQueryStr,
   }
 })

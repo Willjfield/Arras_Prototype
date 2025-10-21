@@ -7,7 +7,7 @@ interface EventEmitter {
   emit(event: string, data: any): void;
 }
 
-export function onIndicatorSelected(side: 'left' | 'right' | string): void;
+export function onChildcareIndicatorSelected(side: 'left' | 'right' | string): void;
 
 /**
  * Assigns point layer event listeners to a map instance

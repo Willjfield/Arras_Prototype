@@ -1,52 +1,10 @@
 {   
     "indicators": [
         {
-            "title": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
-            "field": "Percent of Total Youth who are Disconnected (not in school & not in labor force)",
-            "geolevel":"tract",
-            "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
-            "layers":{
-                "main":"tracts-harmonized-fill",
-                "outline":"tracts-harmonized-outline"
-            },
-            "style":{
-                "min":{
-                    "color":"hsla(0, 100%, 98%, 1)",
-                    "value":10
-                },
-                "max":{
-                    "color":"hsla(0, 100%, 40%, 1)",
-                    "value":25
-                }
-            },
-            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
-        },
-        {
-            "title": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
-            "field": "Percent of Children (under 18 years) whose income in the past 12 months is below poverty level",
-            "geolevel":"tract",
-            "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
-            "layers":{
-                "main":"tracts-harmonized-fill",
-                "outline":"tracts-harmonized-outline"
-            },
-            "style":{
-                "min":{
-                    "color":"hsla(180, 100%, 98%, 1)",
-                    "value":20
-                },
-                "max":{
-                    "color":"hsla(180, 100%, 40%, 1)",
-                    "value":40
-                }
-            },
-            "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]
-        },
-        {
             "title": "Percent of 3 and 4 Year Olds enrolled in Pre-K",
             "field": "Percent of 3 and 4 Year Olds enrolled in Pre-K",
             "geolevel":"tract",
-            "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vT3RkJw0KU40Hh4fzW7wN0OT_Jh0x4LPKsCHHOOSNrS3Q4Zkgi4fGHSB6krWAYAOhDOEFdtSBLWnGOC/pub?gid=958759768&single=true&output=csv",
+            "google_sheets_url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1NzvNmynYUkd0j-ZsiHyjK5rlt5PDfKKrylVCUOSGNRwAAmU-RFx6EwISS1_CoyOB84XU4q99mRhS/pub?gid=1597849288&single=true&output=csv",
             "layers":{
                 "main":"tracts-harmonized-fill",
                 "outline":"tracts-harmonized-outline"
@@ -54,11 +12,11 @@
             "style":{
                 "min":{
                     "color":"hsla(90, 100%, 98%, 1)",
-                    "value":20
+                    "value":0
                 },
                 "max":{
                     "color":"hsla(90, 100%, 40%, 1)",
-                    "value":40
+                    "value":100
                 }
             },
             "fill_color": ["interpolate", ["linear"], ["to-number", ["get", "1990"]]]

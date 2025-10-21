@@ -57,47 +57,5 @@
             "query_str":"faith",
             "description": "We envision communities where residents can participate in and support faith-based groups and organizations."
         }
-    ],
-    "columns": [
-        {
-            "title": "indicator",
-            "type": "string"
-        },
-        {
-            "title": "geography",
-            "type": "string"
-        },
-        {
-            "title": "2023",
-            "type": "number"
-        },
-        {
-            "title": "2022",
-            "type": "number"
-        },
-        {
-            "title": "2021",
-            "type": "number"
-        },
-        {
-            "title": "2020",
-            "type": "number"
-        },
-        {
-            "title": "2010",
-            "type": "number"
-        },
-        {
-            "title": "2000",
-            "type": "number"
-        },
-        {
-            "title": "1990",
-            "type": "number"
-        },
-        {
-            "title": "1980",
-            "type": "number"
-        }
     ]
 }

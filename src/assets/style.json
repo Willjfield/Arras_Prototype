@@ -16,7 +16,10 @@
     },
     "quality-childcare-source": {
       "type": "geojson",
-      "data": "/geo/Quality_Childcare.geojson"
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
     },
     "tracts-harmonized": {
       "type": "geojson",
