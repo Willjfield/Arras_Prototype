@@ -8,12 +8,12 @@
 <script lang="ts" setup>
   import maplibregl from 'maplibre-gl'
 
-  import { onMounted, onUnmounted, ref, watch } from 'vue'
+  import { onBeforeMount, onMounted, onUnmounted, ref, watch } from 'vue'
   import * as mapStyle from '../assets/style.json'
   //import { indicators } from '../assets/indicators.json'
   import Compare from '../assets/maplibre-gl-compare.js'
   import '../assets/maplibre-gl-compare.css'
-
+  import { useIndicatorLevelStore } from '../stores/indicatorLevelStore'
   const mapContainerLeft = ref<HTMLElement>()
   let leftMap: maplibregl.Map | null = null
 
@@ -28,6 +28,14 @@
     _zoom: number
     _type: string
   }>()
+
+  const leftIndicatorLevelStore = useIndicatorLevelStore('left')
+  const rightIndicatorLevelStore = useIndicatorLevelStore('right')
+  const leftIndicator = leftIndicatorLevelStore.getCurrentIndicator()
+  const rightIndicator = rightIndicatorLevelStore.getCurrentIndicator()
+
+  console.log(leftIndicator)
+  console.log(rightIndicator)
 
   const leftStyle: any = JSON.parse(JSON.stringify(mapStyle))
   const layer2022 = leftStyle.layers.find((f: any) => f.id === 'tracts-2022-fill')
@@ -52,10 +60,12 @@
   let _compare: Compare | null = null
   // Watch for changes in props._type and execute function based on value
   watch(() => props._type, (newType, oldType) => {
-    console.log(`Type changed from ${oldType} to ${newType}`)
     if (_compare) _compare.switchType(newType)
   })
 
+  onBeforeMount(() => {
+    console.log('onBeforeMount')
+  })
   onMounted(() => {
     console.log('mnt')
     // Ensure the container is properly initialized
@@ -89,7 +99,7 @@
         if (!rightMap) return
         const features = rightMap.queryRenderedFeatures(e.point, { })
         if (features.length === 0) return
-        console.log(features[0]?.properties)
+        //console.log(features[0]?.properties)
       })
     }
 

@@ -14,13 +14,9 @@
       "type": "vector",
       "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=7SGo3nVkTl7JQ90xmJ0i\t"
     },
-    "tracts-fill": {
+    "tracts-harmonized": {
       "type": "geojson",
-      "data": "/ChestLanTracts2000.geojson"
-    },
-    "tracts-outline": {
-      "type": "geojson",
-      "data": "/ChestLanTracts2000.geojson"
+      "data": "/ChestLanTractsHarmonized.geojson"
     },
     "schools":{
       "type": "geojson", "data": {
@@ -661,6 +657,35 @@
       }
     },
     {
+      "id": "tracts-harmonized-fill",
+      "type": "fill",
+      "source": "tracts-harmonized",
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "fill-color": "#3388ff",
+        "fill-opacity": {
+          "stops": [
+            [10, 1],
+            [12, 0.65]
+          ]
+        }
+      }
+    },
+    {
+      "id": "tracts-harmonized-outline",
+      "type": "line",
+      "source": "tracts-harmonized",
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-width": 2,
+        "line-color": "#0000"
+      }
+    },
+    {
       "id": "poi_label",
       "type": "symbol",
       "source": "openmaptiles",
@@ -831,60 +856,16 @@
       }
     },
     {
-      "id": "tracts-2000-fill",
-      "type": "fill",
-      "source": "tracts-2000",
-      "layout": {"visibility": "visible"},
+      "id":"quality-childcare",
+      "type": "symbol",
+      "source": "childcare",
+      "layout": {
+        "visibility": "none",
+        "icon-size": 0.75,
+        "icon-allow-overlap": true
+      },
       "paint": {
-        "fill-color": [
-          "step",
-          ["to-number", ["get", "Percent of Population 25 Years and Over whose Highest Education Completed is Less Than High School"]],
-          "#f2f0f7",
-          5, "#cbc9e2",
-          10, "#9e9ac8",
-          15, "#756bb1",
-          20, "#54278f"
-        ],
-        "fill-opacity": 0.65,
-        "fill-outline-color": "#888888"
-      }
-    },
-    {
-      "id": "tracts-2010-fill",
-      "type": "fill",
-      "source": "tracts-2010",
-      "layout": {"visibility": "visible"},
-      "paint": {
-        "fill-color": [
-          "step",
-          ["to-number", ["get", "Percent of Population 25 Years and Over whose Highest Education Completed is Less Than High School"]],
-          "#f7fbff",
-          5, "#c6dbef",
-          10, "#6baed6",
-          15, "#3182bd",
-          20, "#08519c"
-        ],
-        "fill-opacity": 0.65,
-        "fill-outline-color": "#888888"
-      }
-    },
-    {
-      "id": "tracts-2022-fill",
-      "type": "fill",
-      "source": "tracts-2022",
-      "layout": {"visibility": "visible"},
-      "paint": {
-        "fill-color": [
-          "step",
-          ["to-number", ["get", "Percent of Total Youth who are Disconnected (not in school & not in labor force)"]],
-          "#f7fcf5",
-          5, "#c7e9c0",
-          10, "#74c476",
-          20, "#31a354",
-          30, "#006d2c"
-        ],
-        "fill-opacity": 0.65,
-        "fill-outline-color": "#888888"
+        "icon-color": "#888"
       }
     }
   ],

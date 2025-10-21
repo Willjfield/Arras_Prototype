@@ -15,8 +15,17 @@
           </v-col>
           <v-col>
             <v-sheet class="d-flex align-content-start flex-wrap" min-height="3em">
-              <v-btn to="/map" :disabled="!cat.enabled" stacked size="small" class="ma-2" width="45%" v-for="cat in categories" :key="cat.title"
-                :text="cat.title"></v-btn>
+              <v-btn
+                :to="`/map?theme=${cat.query_str}`"
+                :disabled="!cat.enabled"
+                stacked
+                size="small"
+                class="ma-2"
+                width="45%"
+                v-for="cat in categories"
+                :key="cat.title"
+                :text="cat.title"
+              >{{ cat.title }}</v-btn>
             </v-sheet>
           </v-col>
         </v-row>
@@ -26,27 +35,20 @@
 </template>
 <script>
 import { useTheme } from 'vuetify';
-import { nextTick, inject } from 'vue';
-import ml from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-
-import _config_raw from '../assets/landing_page.json?raw';
-const { categories } = JSON.parse(_config_raw);
-
+import { inject } from 'vue';
 
 export default {
   name: 'Landing',
   components: {
   },
   data: () => ({
-    categories
+    categories: inject('mainConfig').categories
   }),
   watch: {},
   async mounted() {
 
   },
   methods: {
-
   }
 }
 </script>
